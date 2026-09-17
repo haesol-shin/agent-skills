@@ -1,0 +1,3 @@
+interface:
+  display_name: "Check Lectures"
+  short_description: "Check remaining lectures and completion status"

@@ -1,0 +1,27 @@
+schema_version = 1
+name = "lecture-tools"
+version = "0.1.0"
+status = "experimental"
+
+[engines.campusctl]
+repository = "https://github.com/haesol-shin/notice-bot"
+target_command = "campusctl"
+release = "unreleased"
+source_status = "extraction-planned"
+development_commit = "6377b2cbd8ef7a5c705c1d361f748500d87486f7"
+contract_path = "docs/contracts/lecture-cli.md"
+contract_status = "missing"
+schema_versions = [1]
+
+[engines.lectural]
+repository = "https://github.com/haesol-shin/lectural"
+development_ref = "feat/local-source"
+development_commit = "46ee75109f4cbfa5926b1add7ffb69d73e0fbd76"
+release = "review-required"
+contract_path = "docs/contracts/cli.md"
+contract_status = "missing"
+schema_versions = [1]
+
+[targets]
+canonical = "agent-skills"
+planned = ["codex", "claude-code", "omp"]

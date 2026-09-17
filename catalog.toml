@@ -1,0 +1,6 @@
+schema_version = 1
+
+[[packages]]
+name = "lecture-tools"
+path = "packages/lecture-tools"
+status = "experimental"
