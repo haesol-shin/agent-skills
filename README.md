@@ -12,7 +12,7 @@ Portable agent skills and plugin bundles for recurring research, project, and st
 
 | Package | Status | Purpose |
 | --- | --- | --- |
-| `lecture-tools` | Experimental, not runnable | Check and play selected lectures, then derive study artifacts or code from authorized video. |
+| `lecture-tools` | Experimental, not runnable | Check and play selected lectures, then build a verified project from authorized course evidence and selected requirements. |
 
 Packages own agent-facing behavior and integration contracts. Standalone engines remain in their own repositories and expose versioned JSON CLIs.
 
