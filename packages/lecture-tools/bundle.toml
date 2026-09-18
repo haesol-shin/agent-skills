@@ -15,8 +15,8 @@ schema_versions = [1]
 
 [engines.lectural]
 repository = "https://github.com/haesol-shin/lectural"
-development_ref = "feat/local-source"
-development_commit = "46ee75109f4cbfa5926b1add7ffb69d73e0fbd76"
+development_ref = "main"
+development_commit = "7d4775f8add3c15317a113d839f2219e4b5426b3"
 release = "review-required"
 contract_path = "docs/contracts/cli.md"
 contract_status = "missing"

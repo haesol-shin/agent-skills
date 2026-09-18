@@ -1,7 +1,7 @@
 {
   "name": "lecture-tools",
   "version": "0.1.0",
-  "description": "Check and play lectures, then build grounded code from selected course evidence.",
+  "description": "Check and play lectures, then build verified projects from selected course requirements and evidence.",
   "author": {
     "name": "agent-skills contributors"
   },
@@ -10,14 +10,14 @@
   "interface": {
     "displayName": "Lecture Tools",
     "shortDescription": "Work with authorized lecture sources.",
-    "longDescription": "Check and play selected lectures, or build verified code from one or more authorized lectures and selected course context.",
+    "longDescription": "Check and play selected lectures, or build a verified project against selected course requirements using authorized multimodal evidence.",
     "developerName": "agent-skills contributors",
     "category": "Productivity",
     "capabilities": ["Interactive", "Write"],
     "defaultPrompt": [
       "Show my remaining lectures.",
       "Play the lecture I select.",
-      "Build a project from these lectures and the selected course context."
+      "Build and verify this project against the selected assignment requirements and course evidence."
     ]
   }
 }
