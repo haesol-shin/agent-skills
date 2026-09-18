@@ -39,7 +39,7 @@ Each repository declares the adopted standard version in `.github/repo-policy.ym
 ## 3. Work item lifecycle
 
 ```text
-Interactive intake -> issue or permitted direct work -> risk and planning route -> optional plan and critique -> maintainer approval -> isolated execution -> verification -> code review -> maintainer merge -> optional separately approved release
+Interactive intake -> issue or permitted direct-pull-request scope -> risk assessment and direct-or-planned route -> plan and critique when required -> maintainer approval -> isolated execution -> verification -> code review -> maintainer merge -> optional separately approved release
 ```
 
 The maintainer owns readiness, risk, plan or design approval, exceptions, merge, release, and production authorization. Implementation details are delegated unless they alter scope, public contracts, security boundaries, cost, or acceptance criteria.
@@ -70,64 +70,62 @@ blocked -> prior state after maintainer-recorded resolution
 An implementation issue states what must become true, not how to code it. The maintainer may write it directly or approve a draft produced through an interactive agent conversation.
 
 ```markdown
-## Outcome
-The user-visible or operational result.
+## Goal
+The user-visible or operational result and why it matters.
 
-## Must have
-- Required behavior.
-- Required verification.
+## Requirements
+- Behavior and constraints the solution must satisfy.
 
 ## Non-goals
 - Explicitly excluded work.
 
-## Done when
-- Conditions the maintainer can verify.
+## Acceptance criteria
+- Observable conditions that prove the goal and requirements are met.
+- Required verification evidence.
 
 ## Dependencies
-- Related contracts, repositories, or releases.
-
-## Planning
-direct | brief | full
-
-## Risk
-low | medium | high
+- Blocking or compatibility inputs from related issues, contracts, repositories, or releases.
 
 ## Risk rationale
+Why the selected `risk:*` label applies.
 ```
 
 Bug issues use the following contract.
 
 ```markdown
-## Actual behavior
-
-## Expected behavior
+## Description
+The observed behavior and its impact.
 
 ## Reproduction
-1.
+Minimal repeatable steps, commands, code, or failing test.
+
+## Expected behavior
+What should happen instead.
 
 ## Affected version
+Version or versions on which the bug was reproduced.
 
 ## Environment
+Relevant OS, runtime, dependency versions, and configuration.
 
-## Failure evidence
+## Evidence
+Logs, stack traces, screenshots, or related output.
 
-## Done when
--
+## Acceptance criteria
+- Observable conditions proving the fix.
+- Required regression coverage.
 
-## Planning
-direct | brief | full
-
-## Risk
-low | medium | high
+## Risk rationale
+Why the selected `risk:*` label applies.
 ```
 
-Planning depth and risk are assessed separately, but medium- and high-risk work requires at least a `brief` plan. `direct` means a low-risk accepted scope can be implemented as one clear reviewable change without a separate plan; `brief` means bounded investigation or a small design choice is required; `full` means intent, architecture, sequencing, or cross-repository coordination requires explicit planning. Maintainer interview is triggered by unclear outcome, constraints, non-goals, or acceptance criteria rather than estimated size. Work that cannot remain one coherent, independently verifiable pull request is split before it becomes Ready.
+Risk is recorded with a `risk:low`, `risk:medium`, or `risk:high` label and justified in the issue. Low-risk work defaults to the direct route when its accepted scope is clear and can be implemented as one reviewable change without a separate plan. A low-risk issue may instead use the planned route when investigation or a design decision is required; medium- and high-risk work must use the planned route. Plan detail is proportional to the risk and uncertainty rather than recorded as a separate planning level. Maintainer interview is triggered by unclear outcome, constraints, non-goals, or acceptance criteria rather than estimated size. Work that cannot remain one coherent, independently verifiable pull request is split before it becomes Ready.
 
 Cross-repository initiatives use one coordinating issue in the integration-owning repository and linked implementation issues in each affected repository. New features and structural changes require issue-backed intake; reproduced bugs may enter through a focused bug issue; ambiguous ideas remain in interactive discussion until their outcome is clear; trivial documentation and clearly low-risk maintenance may proceed directly to a pull request.
 
 ### 3.2 Plan contract
 
-`brief` and `full` work keeps its mutable plan in the affected repository at `.ops/plans/<issue>-<slug>.md`; plans from different repositories are never combined into one directory. The issue remains the outcome contract and the plan references it instead of copying its outcome or non-goals. The Planner owns plan revisions, the Critic returns read-only findings, and their intermediate artifacts remain in the runtime ledger rather than GitHub comments. The accepted plan is committed on the issue branch before `status:ready`; the issue records its path, commit SHA, and maintainer approval. Plan documents remain in the repository after merge as decision history.
+Planned work keeps its mutable plan in the affected repository at `.ops/plans/<issue>-<slug>.md`; plans from different repositories are never combined into one directory. The issue remains the work contract and the plan references it instead of copying its goal, requirements, or non-goals. The Planner owns plan revisions, the Critic returns read-only findings, and their intermediate artifacts remain in the runtime ledger rather than GitHub comments. The accepted plan is committed on the issue branch before `status:ready`; the issue records its path, commit SHA, and maintainer approval. Plan documents remain in the repository after merge as decision history.
 
 ```markdown
 # Plan: <title>
@@ -174,19 +172,31 @@ For high-risk work, the pre-mortem covers trust boundaries, credible failure mod
 Every pull request represents one coherent outcome with an explicit rollback or mitigation strategy and contains the following sections.
 
 ```markdown
-## Outcome
-## Scope and non-goals
-## Plan
-<plan path and approved commit SHA; omit for direct work>
+## Summary
+The result delivered and why the change was needed.
+
+## Changes
+- Concrete implementation changes.
+
 ## Contract and dependency impact
+None | Describe affected APIs, schemas, versions, or repositories.
+
 ## Verification
+- `<acceptance criterion or behavior>` — `<command or check>` — <result>
+- Unverified: none | ...
+
 ## Risk and rollback
+- Risks: remaining failure modes or operational concerns.
+- Rollback: exact reversal or mitigation; use `not applicable` with a rationale when appropriate.
+
 ## Changelog impact
 none | added | changed | fixed | deprecated | removed | security
 
 <user-facing entry when applicable>
+
 ## Related
 Closes #<issue> | Direct low-risk PR: <rationale>
+Plan: .ops/plans/<issue>-<slug>.md @ <approved-plan-commit> <!-- planned work only -->
 ```
 
 Verification records exact commands and results, manual behavior checked, CI evidence, and anything not verified. Checkboxes without results are not evidence. A new commit invalidates prior head-specific review evidence and requires the applicable checks and review to run again.
@@ -197,7 +207,7 @@ Verification records exact commands and results, manual behavior checked, CI evi
 | --- | --- | --- |
 | Low | Documentation, tests, internal cleanup with no behavioral contract change | Focused checks, fresh independent agent review, maintainer merge decision |
 | Medium | User-visible behavior, dependencies, performance, schemas, compatibility | Approved plan, full relevant CI, fresh independent agent review, maintainer merge decision |
-| High | Authentication, credentials, security, destructive operations, public API, cross-repository contract, installer, release, deployment | Approved full plan or design, full CI and realistic smoke evidence, fresh independent adversarial review, explicit rollback, maintainer merge decision |
+| High | Authentication, credentials, security, destructive operations, public API, cross-repository contract, installer, release, deployment | Approved plan with the required pre-mortem, full CI and realistic smoke evidence, fresh independent adversarial review, explicit rollback, maintainer merge decision |
 
 The planning agent proposes the initial risk with evidence, the maintainer confirms it when marking issue-backed work Ready, and the highest applicable category wins. An agent may raise risk when new evidence appears; lowering risk requires maintainer approval. Discoveries that affect credentials, destructive behavior, public or cross-repository contracts, installers, release, or deployment immediately pause work for reclassification.
 
@@ -356,7 +366,7 @@ The maintainer currently coordinates work through OMP's main interactive session
 
 One versioned, machine-readable workflow contract is the source of truth for required fields, allowed state transitions, role permissions, iteration limits, and artifact schemas. Templates are generated from or validated against that contract. Prompts and runtime adapters reference its contract ID and version instead of restating schemas. CI validates changed templates, prompts, adapters, and sample artifacts together so their required fields and verdicts cannot drift independently.
 
-The durable states are `triage`, `planning`, `ready`, `executing`, `reviewing`, `merge-ready`, `merged`, and `blocked`. A direct change may move from `triage` to `ready` without a plan; all other transitions require the applicable issue, approval, approved plan commit, verification receipt, review receipt, or maintainer decision. GitHub is the source of truth for work state and human authorization. The runtime ledger is the source of truth for internal planning and review generations; it must not create a competing approval state.
+The durable states are `triage`, `planning`, `ready`, `executing`, `reviewing`, `merge-ready`, `merged`, and `blocked`. A low-risk direct change may move from `triage` to `ready` without a plan. Medium- and high-risk work, along with low-risk work routed through planning, requires an approved plan commit before becoming Ready. All other transitions require the applicable issue, approval, verification receipt, review receipt, or maintainer decision. GitHub is the source of truth for work state and human authorization. The runtime ledger is the source of truth for internal planning and review generations; it must not create a competing approval state.
 
 During the manual pilot, each repository keeps its untracked ledger at `.ops/runtime/<issue-or-direct>/<run-id>/ledger.jsonl` and excludes `.ops/runtime/` from version control. Each append-only record contains the contract version, run ID, generation, role, artifact type, artifact-relative path, SHA-256 digest, timestamp, and provenance. The final GitHub status cites the run ID and digest of the final receipt. The trusted host persists and backs up this directory; after restart, missing or mismatched ledger evidence blocks further mutation until the maintainer reconciles it. Future automation may replace this storage location without changing the logical ledger contract.
 
