@@ -69,6 +69,8 @@ blocked -> prior state after maintainer-recorded resolution
 
 An implementation issue states what must become true, not how to code it. The maintainer may write it directly or approve a draft produced through an interactive agent conversation.
 
+Issue titles use a concise natural-language imperative outcome, such as `Publish a versioned extraction JSON contract` or `Establish the repository operations standard v0.1`. They do not use Conventional Commit prefixes such as `feat(scope):` or `refactor(scope):`; those prefixes are reserved for commit subjects and pull request titles.
+
 ```markdown
 ## Goal
 The user-visible or operational result and why it matters.
