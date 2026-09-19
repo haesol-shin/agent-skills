@@ -137,4 +137,3 @@ $RECYCLE.BIN/
 # Repository-local state
 profiles/local.toml
 profiles/*.lock
-.ops/runtime/

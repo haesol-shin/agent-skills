@@ -8,8 +8,8 @@
 
 - The maintainer defines outcomes, required behavior, non-goals, acceptance criteria, risk, and authorization; agents own delegated planning, execution, verification, and pull request preparation.
 - Every mutation is traceable through an issue-backed or explicitly permitted direct-pull-request scope, an isolated branch and worktree, commits, verification evidence, and a merge decision.
-- Planning and implementation are separate gates for medium- and high-risk work; approval of an issue does not authorize an unreviewed implementation plan.
-- An agent may prepare a branch and pull request but cannot approve or merge its own work. It may tag, publish, deploy, migrate, perform destructive cleanup, or change production credentials only when a separately recorded maintainer approval names that exact operation and authorizes the agent as executor.
+- Planning and implementation are separate gates for medium- and high-risk work; accepted intent authorizes bounded medium-risk execution, while high-risk execution also requires approval of the reviewed plan.
+- An executing agent may prepare a branch and pull request but cannot authorize or merge its own work. It may tag, publish, deploy, migrate, perform destructive cleanup, or change production credentials only when a separately recorded maintainer approval names that exact operation and authorizes the agent as executor.
 - Repository merge, release, and production deployment are separate authorities; completing one never implies permission for the next.
 - Policies are enforced by repository rules and CI where practical; prose-only rules must be treated as advisory until enforcement exists.
 - Process complexity must be proportional to risk; a small documentation fix does not require the same review depth as authentication, public contracts, destructive behavior, or releases.
@@ -18,240 +18,164 @@ The operating model draws on [OpenAI's harness-engineering practice](https://ope
 
 ## 2. Policy ownership
 
-The future public `haesol-shin/.github` repository is the canonical home for account-wide contribution guidance, security reporting, issue and pull request templates, reusable workflows, and this operating standard. Each product repository keeps only repository-specific commands, boundaries, and release details.
+The public `haesol-shin/.github` repository is the canonical home for account-wide workflow policy, receipt and repository-policy schemas, trusted validators, reusable workflows, contribution guidance, security reporting, and default issue and pull request templates. Each product repository keeps repository-specific commands, boundaries, and release details. `agent-skills` owns installable runtime behavior and adapters that consume the central contract; it does not become a second policy or schema owner.
 
-GitHub-provided default community files affect the contribution interface but are not copied into repository clones, so every instruction required by a local agent remains in that repository's `AGENTS.md` or `CONTRIBUTING.md`.
+GitHub-provided default community files affect the contribution interface but are not copied into repository clones, so every instruction required by a local agent remains in that repository's `AGENTS.md` or `CONTRIBUTING.md`. A repository-local issue-template directory replaces the account defaults as a set rather than extending them.
 
 | Concern | Canonical owner |
 | --- | --- |
-| Account-wide workflow and review policy | `haesol-shin/.github` |
+| Workflow, risk, review, receipt, and provenance contracts | `haesol-shin/.github` |
+| Trusted policy validators and reusable workflows | `haesol-shin/.github` |
 | Default issue and pull request templates | `haesol-shin/.github` |
-| Reusable CI and release workflows | `haesol-shin/.github` |
-| Engine-neutral agent roles, workflow contracts, prompts, and provenance schemas | `agent-skills`, initially as a proposed repository-operations package |
+| Runtime adapters and installable agent behavior | `agent-skills` |
 | Repository-specific agent rules and safety boundaries | Repository `AGENTS.md` |
-| Repository-specific development commands | Repository `CONTRIBUTING.md` |
+| Repository-specific development and verification commands | Repository `CONTRIBUTING.md` and `.github/repo-policy.yml` |
 | Product release procedure and supported artifacts | Repository `RELEASE.md` |
 | User-visible release history | Repository `CHANGELOG.md` |
 | Cross-repository product compatibility | Owning bundle's `bundle.toml` |
 
-Each repository declares the adopted standard version in `.github/repo-policy.yml`. Shared workflows are referenced by an immutable commit SHA; branches and tags are not trusted as immutable workflow inputs.
+Each repository declares the adopted contract revision in `.github/repo-policy.yml`. Shared workflows are referenced by an immutable commit SHA; branches and tags are not trusted as immutable workflow inputs.
 
 ## 3. Work item lifecycle
 
 ```text
-Interactive intake -> issue or permitted direct-pull-request scope -> risk assessment and direct-or-planned route -> plan and critique when required -> maintainer approval -> isolated execution -> verification -> code review -> maintainer merge -> optional separately approved release
+Interactive intake -> issue or permitted direct pull request -> accepted intent -> planned or direct route -> draft pull request -> internal plan review when required -> high-risk plan approval when required -> isolated execution -> verification -> internal implementation review -> exact-head merge-ready review -> maintainer merge -> optional separately approved release
 ```
 
-The maintainer owns readiness, risk, plan or design approval, exceptions, merge, release, and production authorization. Implementation details are delegated unless they alter scope, public contracts, security boundaries, cost, or acceptance criteria.
+GitHub is the control plane for human intent, authorization, exact-head merge evidence, and final decisions. The runtime owns internal planning and implementation rounds. Intermediate rounds and findings stay inside the runtime unless their round limit is exhausted or maintainer action is required.
 
-| Gate | Decision owner | Permitted operator |
+| Gate | Decision owner | Durable GitHub record |
 | --- | --- | --- |
-| Mark issue ready and confirm proposed risk | Maintainer | Maintainer or agent recording the maintainer decision |
-| Approve plan or design | Maintainer | Maintainer records approval; Planner records later revisions |
-| Accept independent review | Maintainer | Independent reviewer reviews; executor resolves findings |
-| Merge pull request | Maintainer | Maintainer |
-| Approve release and exact release commit | Maintainer | Maintainer or explicitly authorized release automation |
-| Deploy, migrate, clean up destructively, or change credentials | Maintainer | Named agent, automation, or maintainer |
+| Accept intent and risk | Maintainer | Issue comment bound to the intent digest |
+| Approve a high-risk plan | Maintainer | Draft pull request comment bound to the intent, plan digest, and plan commit |
+| Declare an exact head merge-ready | Fresh-context Reviewer | Final GitHub Review, or pull request comment under a shared identity, with the merge-review receipt |
+| Merge pull request | Maintainer | GitHub merge event |
+| Approve release and exact release commit | Maintainer | Pull request or release approval bound to the exact commit |
+| Deploy, migrate, clean up destructively, or change credentials | Maintainer | Separate approval naming the operation and executor |
 
-An approval is valid only when recorded in the relevant GitHub issue or pull request by the maintainer and names the artifact and operation. Plan and design approvals bind to the plan path and the commit SHA containing the approved revision; review acceptance, merge approval, and release approval bind to an exact head SHA. A plan edit invalidates its approval. Ordinary implementation commits do not invalidate an approved plan unless they change its scope, contract, security boundary, or release target; any new commit invalidates head-bound review and merge evidence. Chat discussion may shape a proposal but is not durable approval until recorded there. The one exception is initial authorization for direct low-risk work: the maintainer may give it in the dispatching conversation, and the executor must reproduce the authorized scope and rationale in the first draft pull request before requesting review. Creating an issue never authorizes product implementation. `status:planning` permits only an isolated branch or worktree, plan-file edits, and plan-only commits; `status:ready` authorizes issue-backed product implementation against the approved plan revision.
+Creating an issue does not authorize implementation. An accepted medium-risk intent authorizes the reviewed plan and bounded implementation unless the plan changes the outcome, non-goals, public contract, security boundary, cost, or acceptance criteria. High-risk work additionally requires explicit approval of the final reviewed plan. Initial authorization for a direct low-risk pull request may be given in the dispatching conversation, and its scope and rationale must appear in the draft pull request. Any material intent or plan change invalidates the dependent authorization. Any new commit invalidates exact-head merge evidence.
 
-The initial shared labels are `status:triage`, `status:planning`, `status:ready`, `status:executing`, `status:reviewing`, `status:merge-ready`, `status:blocked`, `risk:low`, `risk:medium`, and `risk:high`. Merged state is represented by the closed pull request rather than a persistent label. An account-level GitHub Project may be added when cross-repository priority can no longer be managed clearly through labels and queries.
+The workflow uses GitHub's native issue, draft pull request, review, check, and merge states rather than status labels. An account-level GitHub Project may later provide cross-repository portfolio fields if native search is insufficient.
+
+### 3.1 Issue and intent contract
+
+An issue is an intake and discussion surface, not a complete implementation specification. It begins with the smallest complete statement of the problem and desired outcome; reproduction, evidence, constraints, and non-goals belong in those sections when relevant rather than in empty one-item sections.
+
+Issue titles use a concise natural-language outcome, such as `Publish a versioned extraction JSON contract`. Conventional Commit prefixes are reserved for commit subjects and pull request titles.
+
+```markdown
+## Problem
+
+Current behavior, impact, and relevant evidence. A bug includes reproduction and environment here when known.
+
+## Desired outcome
+
+What must become true, including material constraints and non-goals.
+```
+
+When discussion has stabilized the intent, the maintainer records one accepted-intent comment that states the resolved outcome, invariants, non-goals, risk, and content digest. The comment, not a copy in the pull request, is the durable intent authority. Editing or deleting it revokes dependent authorization until the trusted validator accepts a replacement.
 
 ```text
-triage -> planning -> ready -> executing -> reviewing -> merge-ready -> merged
-triage -> ready
-reviewing -> executing
-any active state -> blocked
-blocked -> prior state after maintainer-recorded resolution
+Intent accepted.
+
+<resolved outcome, invariants, and non-goals>
+
+Risk: <low|medium|high>
+Intent digest: sha256:<digest>
 ```
 
-### 3.1 Issue contracts
+Canonical digest construction is part of the central contract and its conformance fixtures. Structured payloads are parsed into schema-defined fields, text fields normalize CRLF and CR to LF with one terminal newline, and the result is hashed as UTF-8 [JSON Canonicalization Scheme](https://www.rfc-editor.org/rfc/rfc8785) bytes. The diff digest hashes the raw output of `git -c core.quotePath=true diff --binary --full-index --no-color --no-ext-diff --no-textconv --no-renames <base>...<head> --`. A permitted direct low-risk pull request without an accepted-intent comment uses the literal `intent:none`; its authorization scope and rationale remain in the pull request body.
+Each machine-readable record occupies one standalone line, uses the fields in the shown order with one ASCII space between fields, and permits human-readable Markdown only on other lines of the same comment.
 
-An implementation issue states what must become true, not how to code it. The maintainer may write it directly or approve a draft produced through an interactive agent conversation.
+Low-risk work defaults to the direct route when its accepted scope is clear and can be implemented as one reviewable change. Medium- and high-risk work use the planned route. Risk is justified in the accepted-intent comment or, for a direct pull request, in the pull request body. An agent may raise risk when new evidence appears; lowering risk requires maintainer approval. Work that cannot remain one coherent, independently verifiable pull request is split before execution.
 
-Issue titles use a concise natural-language imperative outcome, such as `Publish a versioned extraction JSON contract` or `Establish the repository operations standard v0.1`. They do not use Conventional Commit prefixes such as `feat(scope):` or `refactor(scope):`; those prefixes are reserved for commit subjects and pull request titles.
-
-```markdown
-## Goal
-The user-visible or operational result and why it matters.
-
-## Requirements
-- Behavior and constraints the solution must satisfy.
-
-## Non-goals
-- Explicitly excluded work.
-
-## Acceptance criteria
-- Observable conditions that prove the goal and requirements are met.
-- Required verification evidence.
-
-## Dependencies
-- Blocking or compatibility inputs from related issues, contracts, repositories, or releases.
-
-## Risk rationale
-Why the selected `risk:*` label applies.
-```
-
-Bug issues use the following contract.
-
-```markdown
-## Description
-The observed behavior and its impact.
-
-## Reproduction
-Minimal repeatable steps, commands, code, or failing test.
-
-## Expected behavior
-What should happen instead.
-
-## Affected version
-Version or versions on which the bug was reproduced.
-
-## Environment
-Relevant OS, runtime, dependency versions, and configuration.
-
-## Evidence
-Logs, stack traces, screenshots, or related output.
-
-## Acceptance criteria
-- Observable conditions proving the fix.
-- Required regression coverage.
-
-## Risk rationale
-Why the selected `risk:*` label applies.
-```
-
-Risk is recorded with a `risk:low`, `risk:medium`, or `risk:high` label and justified in the issue. Low-risk work defaults to the direct route when its accepted scope is clear and can be implemented as one reviewable change without a separate plan. A low-risk issue may instead use the planned route when investigation or a design decision is required; medium- and high-risk work must use the planned route. Plan detail is proportional to the risk and uncertainty rather than recorded as a separate planning level. Maintainer interview is triggered by unclear outcome, constraints, non-goals, or acceptance criteria rather than estimated size. Work that cannot remain one coherent, independently verifiable pull request is split before it becomes Ready.
-
-Cross-repository initiatives use one coordinating issue in the integration-owning repository and linked implementation issues in each affected repository. New features and structural changes require issue-backed intake; reproduced bugs may enter through a focused bug issue; ambiguous ideas remain in interactive discussion until their outcome is clear; trivial documentation and clearly low-risk maintenance may proceed directly to a pull request.
+Cross-repository initiatives use one coordinating issue in the integration-owning repository and linked implementation pull requests or issues in affected repositories. The coordinating issue closes only after every required repository change is integrated. Trivial documentation and clearly low-risk maintenance may proceed directly to a pull request.
 
 ### 3.2 Plan contract
 
-Planned work keeps its mutable plan in the affected repository at `.ops/plans/<issue>-<slug>.md`; plans from different repositories are never combined into one directory. The issue remains the work contract and the plan references it instead of copying its goal, requirements, or non-goals. The Planner owns plan revisions, the Critic returns read-only findings, and their intermediate artifacts remain in the runtime ledger rather than GitHub comments. The accepted plan is committed on the issue branch before `status:ready`; the issue records its path, commit SHA, and maintainer approval. Plan documents remain in the repository after merge as decision history.
+Planned work keeps its current plan at `.ops/plans/<issue>-<slug>.md` in the affected repository. The plan references the issue and accepted-intent digest instead of copying the issue. The Planner owns revisions; the Critic is read-only. A candidate plan commit opens the draft pull request, internal review may replace it on the branch, and only the accepted plan content remains in the squash-merged decision history; intermediate review artifacts remain runtime-owned.
 
 ```markdown
-# Plan: <title>
+# <plan title>
 
-## Inputs
-- Issue: #<issue>
-- Specification:
-- Research:
+Issue: #<issue>
+Intent: `sha256:<digest>`
 
-## Decision drivers
-1.
+## Approach
 
-## Options considered
+The chosen design, material alternatives, decision drivers, contract and dependency effects, and high-risk pre-mortem when required.
 
-### Option A
+## Execution
 
-### Option B
+Ordered, independently verifiable implementation slices.
 
-## Chosen approach
+## Verification and recovery
 
-## Contract and dependency impact
-
-## Execution slices
-1.
-
-## Verification
-
-## Rollout
-
-## Rollback or mitigation
-
-## Open decisions
-
-## Pre-mortem
-<required for high-risk work>
+Behavioral checks, realistic smoke evidence, rollout, and rollback or mitigation.
 ```
 
-Planning stops when the Critic accepts the same plan revision that is presented to the maintainer. Planner-Critic revision is limited to three iterations per planning run; reaching the limit sets the work to `status:blocked` and requires the maintainer to split scope, clarify intent, or approve a documented exception. Any later change to the approved plan file, scope, public contract, security boundary, or release plan returns the work to planning and requires renewed approval against the new plan commit.
+One plan review round is review of one immutable plan digest followed by either approval or one consolidated revision request. Medium-risk planning permits at most three rounds; high-risk planning permits at most five. A valid reviewer verdict consumes a round; timeouts, malformed output, unavailable reviewers, and cancelled runs do not. Rebase-only head changes with an unchanged plan and diff digest require provenance rebinding but do not consume a round. Exhausting the limit with blockers produces one GitHub blocker handoff and requires maintainer intervention.
 
-For high-risk work, the pre-mortem covers trust boundaries, credible failure modes, compatibility and migration impact, recovery, and required security evidence.
+Medium-risk work proceeds automatically after internal plan approval because accepted intent already delegated bounded execution. High-risk work pauses after internal plan approval and requires one maintainer comment on the draft pull request:
+
+```text
+repo-ops.plan-approval.v1 decision:approved risk:high issue:<number> intent:sha256:<digest> plan:sha256:<digest> plan-commit:<sha>
+```
+
+The trusted validator accepts the approval only from an authorized maintainer when the named plan commit is in the pull request history and its content still matches the intent and plan digests. Later implementation commits do not invalidate that approval; changing the intent or plan does. For high-risk work, the plan covers trust boundaries, credible failure modes, compatibility and migration impact, recovery, and required security evidence.
 
 ### 3.3 Pull request contract
 
-Every pull request represents one coherent outcome with an explicit rollback or mitigation strategy and contains the following sections.
+Every pull request represents one coherent outcome. A candidate plan commit opens the draft pull request; implementation, verification, and internal review continue there after the applicable plan gate passes. The executing agent marks the pull request Ready only after the implementation review joins cleanly and required evidence is current.
 
 ```markdown
-## Summary
-The result delivered and why the change was needed.
+## What
 
-## Changes
-- Concrete implementation changes.
+The delivered result and material behavior, including a Plan link when one exists.
 
-## Contract and dependency impact
-None | Describe affected APIs, schemas, versions, or repositories.
+## Why
+
+The problem, root cause, chosen approach, and important tradeoffs.
 
 ## Verification
-- `<acceptance criterion or behavior>` — `<command or check>` — <result>
-- Unverified: none | ...
 
-## Risk and rollback
-- Risks: remaining failure modes or operational concerns.
-- Rollback: exact reversal or mitigation; use `not applicable` with a rationale when appropriate.
+- `<behavior>` — `<command or evidence>` — `<result>`
+- Unverified: none | <gap and reason>
 
-## Changelog impact
-none | added | changed | fixed | deprecated | removed | security
+Risk: <low|medium|high> — <rationale>
+Rollback: <exact reversal or mitigation>
 
-<user-facing entry when applicable>
-
-## Related
-Closes #<issue> | Direct low-risk PR: <rationale>
-Plan: .ops/plans/<issue>-<slug>.md @ <approved-plan-commit> <!-- planned work only -->
+Fixes #<issue> | Direct low-risk PR: <rationale>
 ```
 
-Verification records exact commands and results, manual behavior checked, CI evidence, and anything not verified. Checkboxes without results are not evidence. A new commit invalidates prior head-specific review evidence and requires the applicable checks and review to run again.
+The pull request does not copy the accepted intent or add one-item sections for links, changelog impact, or contract metadata. Verification records exact commands and results, manual behavior checked, CI evidence, and anything not verified. Checkboxes without results are not evidence.
 
 ## 4. Risk and review
 
-| Risk | Typical changes | Required evidence |
-| --- | --- | --- |
-| Low | Documentation, tests, internal cleanup with no behavioral contract change | Focused checks, fresh independent agent review, maintainer merge decision |
-| Medium | User-visible behavior, dependencies, performance, schemas, compatibility | Approved plan, full relevant CI, fresh independent agent review, maintainer merge decision |
-| High | Authentication, credentials, security, destructive operations, public API, cross-repository contract, installer, release, deployment | Approved plan with the required pre-mortem, full CI and realistic smoke evidence, fresh independent adversarial review, explicit rollback, maintainer merge decision |
+| Risk | Typical changes | Plan review limit | Implementation review limit | Required evidence |
+| --- | --- | ---: | ---: | --- |
+| Low | Documentation, tests, internal cleanup with no behavioral contract change | None | 2 rounds | Focused checks, fresh-context review, maintainer merge |
+| Medium | User-visible behavior, dependencies, performance, schemas, compatibility | 3 rounds | 3 rounds | Internally approved plan, full relevant CI, fresh-context review, maintainer merge |
+| High | Authentication, credentials, security, destructive operations, public API, cross-repository contract, installer, release, deployment | 5 rounds | 5 rounds | Maintainer-approved plan with pre-mortem, full CI and realistic smoke evidence, adversarial fresh-context review, explicit rollback, maintainer merge |
 
-The planning agent proposes the initial risk with evidence, the maintainer confirms it when marking issue-backed work Ready, and the highest applicable category wins. An agent may raise risk when new evidence appears; lowering risk requires maintainer approval. Discoveries that affect credentials, destructive behavior, public or cross-repository contracts, installers, release, or deployment immediately pause work for reclassification.
+Changes to the workflow contract or schema, trusted validators, repository policy, risk classifier, verification commands, or release and deployment workflows are always high-risk. They are evaluated under the immutable base policy and cannot authorize themselves.
 
-Review borrows [Gajae Code's](https://github.com/Yeachan-Heo/gajae-code) role separation, explicit verdicts, severity discipline, immutable change-set binding, and bounded repair. After implementation verification, the head is frozen and the reviewer receives the issue contract, approved plan when present, `base...HEAD` diff, directly relevant contracts, and verification evidence without the authoring conversation. The verdict is `APPROVE`, `COMMENT`, or `REQUEST_CHANGES`, and every finding records severity, evidence, and a concrete correction. The executor cannot review its own work. Findings are consolidated before the executor starts one repair batch; repaired code is verified, frozen as a new review generation, and reviewed again. Review is limited to three generations, after which the work becomes `status:blocked` for maintainer intervention. Every verdict is bound to the exact head SHA, so a new commit invalidates it. Medium- and high-risk reviews should use a different model family from the executor when available.
+Review borrows [Gajae Code's](https://github.com/Yeachan-Heo/gajae-code) role separation, explicit verdicts, severity discipline, immutable change-set binding, joined findings, and bounded repair. The reviewer receives accepted intent, the approved plan when present, the full `merge-base...head` diff, relevant contracts, and verification evidence without the authoring conversation. Internal verdicts are `APPROVE`, `REQUEST_CHANGES`, or `INCONCLUSIVE`; only a valid completed verdict consumes a round. Findings are joined before one consolidated fix batch starts. High-risk review uses the same Reviewer role with stronger attention to trust boundaries, abuse paths, recovery, and evidence quality.
 
-Adversarial review is the risk-calibrated instruction used for high-risk work, not a separate workflow role, runtime agent, state, or receipt type. It uses the same Reviewer role and review contract with stronger attention to trust boundaries, abuse paths, recovery, and evidence quality.
+Intermediate implementation rounds remain runtime-owned and do not accumulate as GitHub comments. When the exact head joins cleanly, the reviewer publishes one final human-readable conclusion and machine-readable receipt as a native GitHub Review when it uses a distinct identity, or as a pull request comment when it shares the author's identity:
 
-Full review artifacts and intermediate generations remain beside the runtime ledger and are indexed by it. GitHub receives one final status for the clean head with the verdict, exact head SHA, evidence reference, and reviewer provenance; iterative findings do not accumulate as pull request comments. During the manual pilot this status may be a single final pull request comment. The target automated design publishes a trusted check and makes it a merge prerequisite. If the agent and maintainer use the same GitHub identity, distinct run provenance and exclusive maintainer merge authority provide the initial separation; a least-privilege agent identity or GitHub App may later make identity separation enforceable by GitHub.
-
-Each internal review generation produces a receipt conforming to the following logical contract; the machine-readable schema, not this display form, becomes authoritative when implemented.
-
-```markdown
-## Contract version
-
-## Review generation
-
-## Reviewed head
-
-## Verdict
-APPROVE | COMMENT | REQUEST_CHANGES
-
-## Findings
-
-### <severity>: <title>
-- Evidence:
-- Impact:
-- Required correction:
-- Resolution: fixed | rebutted | accepted-risk
-
-## Verification gaps
-
-## Reviewer provenance
-- Runtime:
-- Runtime version:
-- Model:
-- Custom agent or prompt: <optional; omit when using the runtime default>
+```text
+repo-ops.merge-review.v1 verdict:merge-ready risk:<risk> intent:<sha256:digest|none> plan:<sha256:digest|none> plan-round:<n/max|none> implementation-round:<n/max> base:<sha> head:<sha> diff:sha256:<digest> runtime:<runtime/version> model:<provider/model>
 ```
+
+The trusted validator independently recomputes the head, merge base, binary diff digest, intent and plan digests, applicable round ceilings, reviewer authority, and the live `CI / quality` conclusion. A receipt indexes evidence; it is not evidence by itself. A new implementation commit makes the merge-ready receipt stale. Rebase-only rebinding of an unchanged diff does not consume a round. If the limit is exhausted with blockers, the runtime posts one blocker handoff with the unresolved findings instead of a merge-ready receipt.
+
+When the executor, reviewer, and maintainer share one GitHub identity, GitHub cannot authenticate role independence. The receipt is posted as a pull request comment, the validator applies the same schema and exact-head rules, and the maintainer remains the sole merge authority. A distinct least-privilege GitHub App or bot is required before the policy can claim independently authenticated reviewer identity or require an approving review.
 
 ## 5. Branches, worktrees, commits, and merge
 
 - `main` is the only long-lived branch unless sustained parallel release integration demonstrates a need for `dev`.
-- Each pull request in each repository uses one isolated worktree and a short-lived branch named `<type>/<issue>-<short-kebab-description>`, for example `feat/42-local-evidence`; one issue may coordinate several linked pull requests with an explicit merge order.
+- Each pull request in each repository uses one isolated worktree and a short-lived branch named `<type>/<issue>-<short-kebab-description>`, for example `feat/42-local-evidence`; a permitted direct low-risk pull request uses `<type>/<short-kebab-description>`. One issue may coordinate several linked pull requests with an explicit merge order.
 - Valid branch and commit types are `feat`, `fix`, `docs`, `refactor`, `test`, `perf`, `ci`, `build`, `chore`, and `revert`.
 - Commit subjects and pull request titles use `type(scope): imperative summary`, for example `feat(lectural): accept local media evidence`.
 - Stage exact paths, review the staged diff, and never mix unrelated user changes into the branch.
@@ -261,13 +185,13 @@ APPROVE | COMMENT | REQUEST_CHANGES
 
 ## 6. Repository rules
 
-Every active repository protects `main` with a GitHub ruleset that requires a pull request, linear history, the stable aggregate `quality-gate` status, resolved review conversations, and blocks force pushes and deletion. Automatic merge is disabled. Required approving reviews are enabled only when PR authorship uses an identity distinct from the maintainer; otherwise the maintainer remains the sole merge authority and the limitation is documented.
+Every active repository protects `main` with a GitHub ruleset that requires a pull request, linear history, the stable `CI / quality` and `Repository policy / contract` checks, resolved review conversations, and blocks force pushes and deletion. Automatic merge is disabled. Required approving reviews are enabled only when PR authorship uses an identity distinct from the maintainer; otherwise the maintainer remains the sole merge authority and the limitation is documented.
 
 Tag rules protect `v*` for distributable repositories. The only permitted creation path is the release workflow or maintainer identity named by the recorded release approval; a release tag must reference that approved, verified commit reachable from protected `main` and must not be moved or recreated.
 
 ## 7. Continuous integration
 
-Every repository exposes one stable required status named `quality-gate`, even when its internal jobs differ. During the manual pilot, it aggregates implemented repository CI only; one final exact-head pull request comment records the manual policy and review result. After `repo-ops-gate` exists and has been validated in advisory mode, `quality-gate` also requires it to validate the adopted contract version, required issue and plan approval, iteration ceilings, unresolved blockers, final review receipt, and exact head binding. Pull request workflows use read-only permissions by default, receive no production secrets, pin third-party Actions to reviewed immutable revisions, and rerun for every new head.
+Every repository exposes two stable required checks. `CI / quality` runs on `pull_request`, executes repository code with read-only permissions and no production secrets, and aggregates all applicable repository verification with an always-running final job. `Repository policy / contract` runs trusted base-owned validation on pull request, review, and issue-comment changes; it treats head content as data, never checks out or executes untrusted head code, and validates intent, high-risk plan approval, round ceilings, unresolved blockers, the final merge-review receipt, and exact-head binding. Required workflows are not path-filtered, and check names are unique so skipped or duplicate contexts cannot accidentally satisfy the ruleset.
 
 ### 7.1 Common checks
 
@@ -289,7 +213,7 @@ Every repository exposes one stable required status named `quality-gate`, even w
 
 Tests requiring real LMS accounts, credentials, paid external services, or production systems remain opt-in and never run on untrusted pull requests. Their absence is recorded under unverified items and, when release-critical, must be supplied as explicit release evidence.
 
-Shared workflows live in `haesol-shin/.github` and are versioned. Each repository contains a thin caller workflow and repository-specific commands in `.github/repo-policy.yml`; shared workflows must not infer arbitrary commands or receive inherited secrets by default.
+Shared workflows live in `haesol-shin/.github` and are versioned. Each repository contains thin caller workflows and repository-specific commands in `.github/repo-policy.yml`; shared workflows must not infer arbitrary commands or receive inherited secrets by default. Policy-comment and review edits or deletions retrigger validation and revoke stale authorization. Pull requests from forks receive the same metadata validation but never production secrets or write-capable execution.
 
 ## 8. Dependencies and cross-repository contracts
 
@@ -304,11 +228,11 @@ Shared workflows live in `haesol-shin/.github` and are versioned. Each repositor
 
 Repositories that publish installable software, plugins, libraries, CLIs, or versioned contracts use Semantic Versioning, annotated `vX.Y.Z` tags, `CHANGELOG.md`, and GitHub Releases. Operations-only repositories may use dated, append-only production change records instead of artificial product releases.
 
-User-visible pull requests add an entry under `## [Unreleased]`; other pull requests state `none` in the changelog-impact field. Released changelog sections are not rewritten except for a separately reviewed correction or security redaction that preserves an audit note. A release pull request moves relevant entries into a dated version section, updates the single canonical version source and any validated mirrors, and includes compatibility, upgrade, known limitations, and rollback or mitigation information.
+User-visible changes add one fragment per change under `changelog.d/<issue>-<slug>.md`; a permitted direct low-risk pull request uses `changelog.d/direct-<slug>.md`. Repositories with multiple release units place the same filename under `packages/<package>/changelog.d/`. A fragment contains one or more `### Added`, `### Changed`, `### Deprecated`, `### Removed`, `### Fixed`, `### Security`, `### Breaking Changes`, `### Documentation`, `### Performance`, or `### Tests` sections with bullet entries. Ordinary pull requests never edit `CHANGELOG.md`; CI validates fragment syntax and ownership, rejects direct edits to the shared unreleased area, and rejects deletion of unconsumed fragments. The trusted release workflow prepares the release pull request by deterministically folding pending fragments into the dated version section and deleting the consumed files. Released sections are append-only except for a separately reviewed correction.
 
 The release sequence is:
 
-1. Merge a release PR into protected `main` after the normal quality gate.
+1. Merge a release PR into protected `main` after both required checks pass.
 2. Validate the intended release commit's version agreement, ancestry from `main`, changelog presence, and complete release test graph.
 3. Build candidate artifacts from that exact commit in CI, generate checksums, and perform clean-install and public-entrypoint smoke tests.
 4. After the aggregate release gate and maintainer approval succeed, create the annotated tag on the validated commit and publish the already-validated artifacts.
@@ -340,67 +264,63 @@ For a multi-repository product, release engines and providers first, validate th
 
 ## 11. Agent workflow and execution
 
-Agent responsibilities are engine-neutral. A workflow role defines responsibility, a runtime names the tool executing it, a model identifies the exact provider and model card selected for that run, and a run is one concrete execution against an issue, plan, or pull request. Runtime agents, model roles, and profiles remain runtime-managed implementation details unless a run uses a custom agent or prompt that materially changes its behavior.
+Agent responsibilities are engine-neutral. A workflow role defines responsibility; a runtime names the tool executing it; a model identifies the exact provider-qualified model selected for that run.
 
 | Workflow role | Responsibility |
 | --- | --- |
-| Planner | Own interactive intake, planning route, plan creation, revision, and decomposition without implementing product changes |
-| Critic | Review a plan without editing it and return an approval or actionable blockers |
-| Executor | Perform only approved implementation or research work and produce verification evidence |
+| Planner | Create and revise the technical plan without implementing product changes |
+| Critic | Review a plan without editing it and return approval or actionable blockers |
+| Executor | Perform only authorized implementation or research and produce verification evidence |
 | Reviewer | Review the frozen implementation without editing it and return evidence-backed findings and a verdict |
 
-The standard adopts the [Gajae Code](https://github.com/Yeachan-Heo/gajae-code) design philosophy without requiring its runtime: interactive intake clarifies intent; a writer-reviewer loop stabilizes the plan; execution advances bounded work with evidence; a second writer-reviewer loop verifies the frozen implementation; and the maintainer owns authorization. The workflow deliberately keeps four roles and does not create separate research, QA, security, or repository-operation roles unless repeated evidence proves an independently triggered contract. Specialized runtime agents such as scouts and security reviewers remain helpers beneath these roles. Any copied or adapted prompt text must be compatible with its source license and retain required attribution; otherwise only the operating concept is reimplemented.
+The standard adopts the [Gajae Code](https://github.com/Yeachan-Heo/gajae-code) separation between external authority and internal writer-reviewer loops without requiring its runtime. Interactive intake stabilizes intent; plan review stabilizes the approach; execution advances bounded work with evidence; implementation review verifies the frozen change; and the maintainer owns authorization and merge. Specialized scouts and security reviewers remain helpers beneath these roles. Copied prompt text must retain license-required attribution; otherwise only the operating concept is reimplemented.
 
 ### 11.1 OMP adapter
 
-[OMP](https://github.com/can1357/oh-my-pi) is the preferred interactive runtime, but the workflow also permits Codex, Claude Code, Gajae Code, or another compatible runtime. OMP separates runtime agents from model roles: prompts and tools belong to agents, while roles such as `plan`, `slow`, and `smol` select configured models. `task` is an agent, not a model role. The adapter reuses OMP rather than replacing its prompts.
+[OMP](https://github.com/can1357/oh-my-pi) is the preferred interactive runtime, while Codex, Claude Code, Gajae Code, or another compatible runtime may implement the same contract. OMP separates runtime agents from configurable model roles.
 
-| Workflow role | OMP surface | Model role |
+| Workflow role | OMP surface | Model selection |
 | --- | --- | --- |
-| Planner | Main interactive session | `@plan` when an explicit planning model is selected |
-| Critic | One custom read-only `plan-critic` agent | `@slow` |
-| Executor | Bundled `task` agent | Agent definition, configured override, or inherited model |
-| Reviewer | Bundled `reviewer` agent | Agent definition, configured override, or inherited model |
+| Planner | Main interactive session | `@plan` when explicitly selected |
+| Critic | Custom read-only `plan-critic` | `@slow` role, resolved at runtime |
+| Executor | Bundled `task` agent | Agent definition or configured override |
+| Reviewer | Bundled `reviewer` agent | Bundled definition, currently resolved through its configured role |
 
-The maintainer currently coordinates work through OMP's main interactive session and invokes `task`, `reviewer`, `plan-critic`, `scout`, or `sonic` only as temporary internal helpers. These helpers do not become separately managed repository actors. The custom `plan-critic` exists because OMP's bundled `reviewer` is patch-oriented rather than a plan reviewer. Repository operations supplies dispatch inputs, artifact schemas, iteration gates, and output normalization around these native agents; it does not copy their runtime prompts. Exact model selection remains runtime-configurable and is recorded with the provider-qualified identifier, such as `openai/gpt-5.6-luna`.
+The main session coordinates temporary helpers; they do not become separate repository actors. The custom `plan-critic` exists because the bundled reviewer is patch-oriented. The adapter supplies dispatch inputs, artifact schemas, round gates, and output normalization without copying native prompts. Receipts record the resolved provider-qualified model ID, not aliases such as `@slow`.
 
 ### 11.2 Contract and enforcement
 
-One versioned, machine-readable workflow contract is the source of truth for required fields, allowed state transitions, role permissions, iteration limits, and artifact schemas. Templates are generated from or validated against that contract. Prompts and runtime adapters reference its contract ID and version instead of restating schemas. CI validates changed templates, prompts, adapters, and sample artifacts together so their required fields and verdicts cannot drift independently.
+One versioned machine-readable contract in `haesol-shin/.github` owns required fields, role permissions, risk rules, round limits, approval and receipt schemas, and trusted validation behavior. Templates and runtime adapters reference its contract revision instead of restating it. CI validates changed schemas, templates, validators, adapters, and samples together.
 
-The durable states are `triage`, `planning`, `ready`, `executing`, `reviewing`, `merge-ready`, `merged`, and `blocked`. A low-risk direct change may move from `triage` to `ready` without a plan. Medium- and high-risk work, along with low-risk work routed through planning, requires an approved plan commit before becoming Ready. All other transitions require the applicable issue, approval, verification receipt, review receipt, or maintainer decision. GitHub is the source of truth for work state and human authorization. The runtime ledger is the source of truth for internal planning and review generations; it must not create a competing approval state.
+GitHub is the durable control plane for accepted intent, high-risk plan approval, the exact-head merge-ready review, checks, merge, release, and exceptional human decisions. Native issue, draft pull request, review, check, and merge states replace a duplicate label state machine. The runtime is the execution plane for internal plan and implementation rounds, findings, retries, and handoffs.
 
-During the manual pilot, each repository keeps its untracked ledger at `.ops/runtime/<issue-or-direct>/<run-id>/ledger.jsonl` and excludes `.ops/runtime/` from version control. Each append-only record contains the contract version, run ID, generation, role, artifact type, artifact-relative path, SHA-256 digest, timestamp, and provenance. The final GitHub status cites the run ID and digest of the final receipt. The trusted host persists and backs up this directory; after restart, missing or mismatched ledger evidence blocks further mutation until the maintainer reconciles it. Future automation may replace this storage location without changing the logical ledger contract.
+Interactive OMP use does not require a repository-local runtime ledger. A future unattended orchestrator must persist its own append-only or transactional state for round artifacts, source hashes, operation identities, locks, blockers, and restart reconciliation; its database or durable storage is runtime-owned and must not create competing human approval state. On uncertain state it reconciles GitHub authority, the current plan digest, head, and its own records before repeating a mutation.
 
-The manual pilot enforces irreversible boundaries first: protected branches, maintainer-only merge, release separation, exact-head CI, and durable approval records. Future automation may enforce runtime transitions, operation IDs, per-issue execution locks, resumable reconciliation, and trusted GitHub checks. On restart or uncertain state, the runtime reads GitHub state, the approved plan commit, head SHA, and the ledger before mutation; it never repeats a mutating operation merely because the prior session response is missing.
+### 11.3 Run provenance and unattended operation
 
-### 11.3 Run provenance
+The final merge-review receipt records the runtime name and version, resolved provider-qualified model ID, related issue and pull request, intent and plan digests, round counts, base, head, and binary diff digest. The trusted validator binds it to the live `CI / quality` conclusion. Custom agents or prompts are recorded only when they materially differ from runtime defaults.
 
-Every material run records the runtime name, runtime version or exact development commit, provider-qualified model ID, related issue or pull request, base SHA, and head SHA. A custom runtime agent or prompt is recorded only when it materially differs from the runtime default; runtime-managed roles, helper agents, model-role aliases, reasoning effort, and default prompt versions are not duplicated in repository provenance. This document owns the requirement; a future repository-operations specification and machine-readable schema will own the exact representation if the workflow package is implemented in `agent-skills`.
+[Herdr](https://github.com/herdrdev/herdr) may keep sessions alive and permit reconnection; it is execution infrastructure, not workflow authority or a task ledger. A future persistent orchestrator may accept an intent-authorized work item, create an isolated worktree and runtime session, manage internal rounds, wait for high-risk GitHub plan approval, and publish the final merge-ready review. Automatic merge remains out of scope.
 
-[Herdr](https://github.com/herdrdev/herdr) may run on `pi-server` to keep OMP or other runtime sessions alive, expose their state, and permit remote reconnection; it is execution infrastructure, not the workflow authority or task ledger. GitHub remains the durable source for work contracts and approvals. Automatic dispatch from `status:ready` is deferred until a manual end-to-end pilot proves the required checks, concurrency limits, reconciliation behavior, and interruption handling.
-
-If unattended operation is later justified, a persistent external orchestrator may follow Gajae Code's public operating pattern by accepting work, starting an isolated runtime session or worktree for each task, and collecting its terminal evidence. That orchestrator is an optional future component, not the OMP main session, Herdr, or a component assumed by this standard.
-
-[Paperthin](https://github.com/LilMGenius/paperthin) skills are optional reasoning, review, quality, and retrospective aids. They do not own workflow state or approval. A run must not operate two competing planning or execution state machines, such as Gajae-style durable planning and Paperthin `re0-plan` or `re0-loop`, while independent critique and retrospective skills may supplement either workflow.
+[Paperthin](https://github.com/LilMGenius/paperthin) skills may supplement reasoning, critique, and retrospectives but do not own approval or run a competing planning or execution state machine.
 
 ### 11.4 Agent operating contract
 
-- The agent starts from an approved issue or a clearly low-risk direct-pull-request scope, reads repository instructions, inspects live state, and reports any conflict between the approved scope and current code before mutation.
+- The agent starts from accepted intent or a clearly low-risk direct-pull-request scope, reads repository instructions, inspects live state, and reports conflicts before mutation.
 - The agent creates or uses the issue-specific worktree and branch, changes only in-scope files, and preserves unrelated user work.
-- The agent records implementation decisions in the pull request, not only in chat context.
+- The agent opens a draft pull request after committing the candidate plan when planning is required, updates that branch through internal plan review, and keeps the pull request's What, Why, and Verification sections current.
 - The agent runs the smallest relevant checks during development and the complete required profile before handoff.
-- The agent performs a fresh self-review of the final diff and every code pull request receives a separate fresh-context reviewer calibrated to its risk.
-- The agent may open or update a draft pull request and respond to review findings but must not approve its own work, merge, tag, release, deploy, or alter credentials without explicit authority.
+- The agent performs a fresh self-review and obtains the required fresh-context review rounds without posting normal intermediate rounds to GitHub.
+- The agent may post the final merge-ready review or a terminal blocker handoff but must not merge, tag, release, deploy, or alter credentials without authority.
 - If execution state is uncertain, the agent reconciles it instead of repeating a potentially mutating operation.
 
 ### 11.5 Operational terms
 
-- A material run can mutate files or external state, approve or review work, or produce evidence used for a gate.
-- Fresh context means the reviewer receives the approved contract, relevant artifacts, diff, and evidence but not the authoring conversation or hidden rationale.
+- A review round evaluates one immutable plan or change-set digest and ends in one valid verdict; infrastructure failures do not consume it.
+- Fresh context means the reviewer receives accepted intent, relevant artifacts, the full diff, and evidence but not the authoring conversation or hidden rationale.
 - Full relevant CI means every required check in the repository's declared profile for the affected surfaces.
 - Realistic smoke evidence exercises the public entrypoint against the closest safe environment to actual use and records the result and known gap.
-- Accepted risk is a specific unresolved finding that the maintainer explicitly records and accepts for the exact head SHA; silence or merge alone is not acceptance.
+- Accepted risk is a specific unresolved finding that the maintainer explicitly accepts for the exact head; silence or merge alone is not acceptance.
 
 ## 12. Exceptions and emergencies
 
@@ -408,11 +328,11 @@ The maintainer may authorize an exception only in the relevant issue or pull req
 
 ## 13. Adoption plan
 
-1. Review this draft and resolve its open operating decisions; it is not enforceable policy yet.
-2. Create the public `haesol-shin/.github` repository, define the repository-policy schema and conformance check, and publish the initial approved standard as version `v0.1.0`.
-3. Derive the default `CONTRIBUTING.md`, security policy, issue forms, pull request template, repository policy schema, and reusable CI workflows.
-4. Pilot the standard manually in LecturAL through interactive issue drafting, maintainer Ready approval, an isolated OMP run using main session, `task`, `reviewer`, and `plan-critic` only when planning requires it, exact-head fresh review, pull request, merge, and retrospective; use Herdr on `pi-server` only for session persistence and remote observation during the pilot.
-5. Decide from pilot evidence whether reusable roles and schemas remain an `agent-skills` package and whether a separate dispatcher or repository is justified; do not create either merely to complete the draft architecture.
-6. Revise the standard only from evidence produced by the pilot, then tag the revision.
-7. Adopt the pinned standard in `agent-skills`, `campusctl`, `campusctl-cnu`, and other repositories through separate reviewable pull requests.
-8. Audit policy drift periodically by comparing each repository's declared standard version, ruleset, required status, workflows, and release configuration.
+1. Finalize this standard in `agent-skills` as the design source for the initial implementation.
+2. Create the public `haesol-shin/.github` repository and publish the central contract, schemas, trusted validators, and default community files as `v0.1.0`.
+3. Implement the Markdown issue template, pull request template, repository-policy schema, `CI / quality` caller contract, `Repository policy / contract` validator, and changelog-fragment checks.
+4. Replay the validator against representative existing pull requests to calibrate risk and receipt handling without treating the work as a new pilot.
+5. Enable the contract check in advisory mode, fix false positives and missing evidence from real use, then make both stable checks required.
+6. Adopt the immutable contract revision in `agent-skills` and subsequent repositories through separate reviewable pull requests.
+7. Add a persistent unattended orchestrator only when automated dispatch, restart reconciliation, or concurrent runs require it.
+8. Audit policy drift periodically by comparing each repository's contract revision, ruleset, required checks, workflows, and release configuration.
