@@ -20,7 +20,7 @@ The operating model draws on [OpenAI's harness-engineering practice](https://ope
 
 The public `haesol-shin/.github` repository is the canonical home for account-wide workflow policy, receipt and repository-policy schemas, trusted validators, reusable workflows, contribution guidance, security reporting, and default issue and pull request templates. Each product repository keeps repository-specific commands, boundaries, and release details. `agent-skills` owns installable runtime behavior and adapters that consume the central contract; it does not become a second policy or schema owner.
 
-GitHub-provided default community files affect the contribution interface but are not copied into repository clones, so every instruction required by a local agent remains in that repository's `AGENTS.md` or `CONTRIBUTING.md`. A repository-local issue-template directory replaces the account defaults as a set rather than extending them.
+GitHub-provided default community files affect the contribution interface but are not copied into repository clones, so every instruction required by a local agent remains in that repository's `AGENTS.md` or `CONTRIBUTING.md`. A repository-local issue-template directory replaces the account defaults as a set rather than extending them. A local template may change front matter and instructional text and may add product-specific level-two sections, but it reproduces every central required heading exactly once and in contract order. Required headings are never renamed or removed.
 
 | Concern | Canonical owner |
 | --- | --- |
@@ -59,7 +59,7 @@ The workflow uses GitHub's native issue, draft pull request, review, check, and 
 
 ### 3.1 Issue and intent contract
 
-An issue is an intake and discussion surface, not a complete implementation specification. It begins with the smallest complete statement of the problem and desired outcome; reproduction, evidence, constraints, and non-goals belong in those sections when relevant rather than in empty one-item sections.
+An issue organizes one bounded work item. It records why the work exists, the outcome that must become true, the result-level work, observable completion conditions, scope exclusions, and dependencies or authority context. It does not prescribe file edits or implementation order; those belong in the plan when planning is required.
 
 Issue titles use a concise natural-language outcome, such as `Publish a versioned extraction JSON contract`. Conventional Commit prefixes are reserved for commit subjects and pull request titles.
 
@@ -70,8 +70,26 @@ Current behavior, impact, and relevant evidence. A bug includes reproduction and
 
 ## Desired outcome
 
-What must become true, including material constraints and non-goals.
+What must become true, including material constraints.
+
+## Work
+
+- Result or deliverable, not a file-by-file implementation step.
+
+## Acceptance
+
+- Observable behavior or evidence that proves completion.
+
+## Non-goals
+
+- Explicitly excluded adjacent work, or `None`.
+
+## Context
+
+Dependencies, responsibility boundaries, approval constraints, and related issues, pull requests, or contracts; use `None` when no context is needed.
 ```
+
+`Work` defines result-level scope, `Acceptance` is the completion contract, and `Non-goals` prevents scope growth. These lists use bullets rather than task checkboxes: Issue state and linked pull requests track progress, while completion requires the evidence recorded in the pull request. A repository may append specialized level-two sections such as an operational target or security boundary anywhere that preserves the shared heading order, but it does not duplicate, rename, or remove the shared headings.
 
 When discussion has stabilized the intent, the maintainer records one accepted-intent comment that states the resolved outcome, invariants, non-goals, risk, and content digest. The comment, not a copy in the pull request, is the durable intent authority. Editing or deleting it revokes dependent authorization until the trusted validator accepts a replacement.
 
@@ -136,14 +154,24 @@ The problem and impact, why the work was needed, and the delivered outcome. This
 ## Changes
 
 - Material user-visible, behavioral, API, schema, dependency, or operational changes.
-- Important non-goals or compatibility effects when relevant; omit empty categories and file-by-file inventories.
+- Important compatibility effects; omit file-by-file inventories.
+
+## Impact
+
+- User/runtime: <effect | none>
+- API/schema/dependencies: <effect | none>
+- Operations/deployment: <effect | none>
+- Not changed: <important preserved boundary | none>
 
 ## Verification
 
 - `<behavior>` — `<command or evidence>` — `<result>`
 - Unverified: none | <gap and reason>
 
+## Risk and rollback
+
 Risk: <low|medium|high> — <rationale>
+
 Rollback: <exact reversal or mitigation>
 
 ## Related
@@ -152,7 +180,7 @@ Fixes #<issue> | Direct low-risk PR: <rationale>
 Plan: <link | none>
 ```
 
-The pull request is independently understandable but does not copy the accepted intent verbatim. `Summary` carries the final context and outcome, `Changes` describes material effects rather than a file inventory, `Verification` records exact commands, evidence, results, and gaps, and `Related` provides provenance rather than required reading. `Risk` and `Rollback` are compact pull-request-level metadata intentionally left unheaded to avoid one-item sections. Checkboxes without results are not evidence. Changelog entries and contract metadata remain in their canonical artifacts instead of becoming one-item pull request sections.
+The pull request is independently understandable but does not copy the accepted intent verbatim. `Summary` carries the final context and outcome, `Changes` records what was delivered, `Impact` separates product, contract, dependency, and production effects, `Verification` records exact commands, evidence, results, and gaps, `Risk and rollback` makes failure exposure and recovery visible, and `Related` provides provenance rather than required reading. Checkboxes without results are not evidence. Changelog entries and file inventories remain in their canonical or generated surfaces instead of becoming pull request sections. Repository-local templates may change instructional text and add sections such as contract impact, deployment procedure, or documentation state while retaining each shared heading exactly once and in contract order.
 
 ## 4. Risk and review
 
@@ -294,7 +322,7 @@ The main session coordinates temporary helpers; they do not become separate repo
 
 ### 11.2 Contract and enforcement
 
-One versioned machine-readable contract in `haesol-shin/.github` owns required fields, role permissions, risk rules, round limits, approval and receipt schemas, and trusted validation behavior. Templates and runtime adapters reference its contract revision instead of restating it. CI validates changed schemas, templates, validators, adapters, and samples together.
+One versioned contract bundle in `haesol-shin/.github` owns the enforceable workflow contract: `contract.json` declares the governed heading level, required occurrence and order, extension policy, round limits, and record order; referenced schemas define structured records and repository policy; the trusted validator implements authorization and risk behavior; conformance fixtures bind those pieces together. Templates and runtime adapters reference the bundle's contract revision instead of restating its rules. CI validates changed schemas, templates, validators, adapters, and samples together.
 
 GitHub is the durable control plane for accepted intent, high-risk plan approval, the exact-head merge-ready review, checks, merge, release, and exceptional human decisions. Native issue, draft pull request, review, check, and merge states replace a duplicate label state machine. The runtime is the execution plane for internal plan and implementation rounds, findings, retries, and handoffs.
 
@@ -312,7 +340,7 @@ The final merge-review receipt records the runtime name and version, resolved pr
 
 - The agent starts from accepted intent or a clearly low-risk direct-pull-request scope, reads repository instructions, inspects live state, and reports conflicts before mutation.
 - The agent creates or uses the issue-specific worktree and branch, changes only in-scope files, and preserves unrelated user work.
-- The agent opens a draft pull request after committing the candidate plan when planning is required, updates that branch through internal plan review, and keeps the pull request's Summary, Changes, Verification, and Related sections current.
+- The agent opens a draft pull request after committing the candidate plan when planning is required, updates that branch through internal plan review, and keeps the pull request's Summary, Changes, Impact, Verification, Risk and rollback, and Related sections current.
 - The agent runs the smallest relevant checks during development and the complete required profile before handoff.
 - The agent performs a fresh self-review and obtains the required fresh-context review rounds without posting normal intermediate rounds to GitHub.
 - The agent may post the final merge-ready review or a terminal blocker handoff but must not merge, tag, release, deploy, or alter credentials without authority.
