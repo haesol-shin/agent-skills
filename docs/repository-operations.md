@@ -211,9 +211,17 @@ When the executor, reviewer, and maintainer share one GitHub identity, GitHub ca
 - Valid branch and commit types are `feat`, `fix`, `docs`, `refactor`, `test`, `perf`, `ci`, `build`, `chore`, and `revert`.
 - Commit subjects and pull request titles use `type(scope): imperative summary`, for example `feat(lectural): accept local media evidence`.
 - Stage exact paths, review the staged diff, and never mix unrelated user changes into the branch.
-- Pull requests use squash merge so the pull request title becomes the permanent `main` commit; merge commits are disabled and noisy intermediate commits do not enter `main`.
+- At merge time, the authorized merge executor uses squash merge and supplies the final subject and body explicitly instead of accepting GitHub's generated commit list. The subject is the final pull request title plus `(#<number>)`. The body starts with a short prose summary of the delivered outcome and includes bullets only for material behavior, contract, compatibility, migration, or rollback facts. It may condense authored pull request content but never copies template headings or instructions, intermediate commit subjects, review chronology, temporary fixes, verification logs, or file inventories. Until automated enforcement exists, the maintainer checks this gate in the merge dialog. Merge commits are disabled so noisy intermediate history does not enter `main`.
 - Delete the source branch and worktree after merge; stale merged branches are operational drift and should be detected periodically.
 - Direct pushes, force pushes, deletion, and history rewriting of protected branches and release tags are prohibited.
+
+```text
+type(scope): imperative summary (#<pull-request>)
+
+<Delivered outcome and why it matters.>
+
+- <Material behavior, contract, compatibility, migration, or rollback fact, when needed.>
+```
 
 ## 6. Repository rules
 
