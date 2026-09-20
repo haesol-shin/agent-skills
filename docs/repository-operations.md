@@ -74,11 +74,11 @@ What must become true, including material constraints.
 
 ## Work
 
-- [ ] Result or deliverable, not a file-by-file implementation step.
+- Result or deliverable, not a file-by-file implementation step.
 
 ## Acceptance
 
-- [ ] Observable behavior or evidence that proves completion.
+- Observable behavior or evidence that proves completion.
 
 ## Non-goals
 
@@ -89,7 +89,7 @@ What must become true, including material constraints.
 Dependencies, responsibility boundaries, approval constraints, and related issues, pull requests, or contracts; use `None` when no context is needed.
 ```
 
-`Work` is the maintainable task list, `Acceptance` is the completion contract, and `Non-goals` prevents scope growth. A repository may append specialized level-two sections such as an operational target or security boundary anywhere that preserves the shared heading order, but it does not duplicate, rename, or remove the shared headings.
+`Work` defines result-level scope, `Acceptance` is the completion contract, and `Non-goals` prevents scope growth. These lists use bullets rather than task checkboxes: Issue state and linked pull requests track progress, while completion requires the evidence recorded in the pull request. A repository may append specialized level-two sections such as an operational target or security boundary anywhere that preserves the shared heading order, but it does not duplicate, rename, or remove the shared headings.
 
 When discussion has stabilized the intent, the maintainer records one accepted-intent comment that states the resolved outcome, invariants, non-goals, risk, and content digest. The comment, not a copy in the pull request, is the durable intent authority. Editing or deleting it revokes dependent authorization until the trusted validator accepts a replacement.
 
