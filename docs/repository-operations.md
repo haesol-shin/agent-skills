@@ -129,13 +129,14 @@ The trusted validator accepts the approval only from an authorized maintainer wh
 Every pull request represents one coherent outcome. A candidate plan commit opens the draft pull request; implementation, verification, and internal review continue there after the applicable plan gate passes. The executing agent marks the pull request Ready only after the implementation review joins cleanly and required evidence is current.
 
 ```markdown
-## What
+## Summary
 
-The delivered result and material behavior, including a Plan link when one exists.
+The problem and impact, why the work was needed, and the delivered outcome. This must stand on its own without opening the issue.
 
-## Why
+## Changes
 
-The problem, root cause, chosen approach, and important tradeoffs.
+- Material user-visible, behavioral, API, schema, dependency, or operational changes.
+- Important non-goals or compatibility effects when relevant; omit empty categories and file-by-file inventories.
 
 ## Verification
 
@@ -145,10 +146,13 @@ The problem, root cause, chosen approach, and important tradeoffs.
 Risk: <low|medium|high> — <rationale>
 Rollback: <exact reversal or mitigation>
 
+## Related
+
 Fixes #<issue> | Direct low-risk PR: <rationale>
+Plan: <link | none>
 ```
 
-The pull request does not copy the accepted intent or add one-item sections for links, changelog impact, or contract metadata. Verification records exact commands and results, manual behavior checked, CI evidence, and anything not verified. Checkboxes without results are not evidence.
+The pull request is independently understandable but does not copy the accepted intent verbatim. `Summary` carries the final context and outcome, `Changes` describes material effects rather than a file inventory, `Verification` records exact commands, evidence, results, and gaps, and `Related` provides provenance rather than required reading. `Risk` and `Rollback` are compact pull-request-level metadata intentionally left unheaded to avoid one-item sections. Checkboxes without results are not evidence. Changelog entries and contract metadata remain in their canonical artifacts instead of becoming one-item pull request sections.
 
 ## 4. Risk and review
 
@@ -298,7 +302,7 @@ Interactive OMP use does not require a repository-local runtime ledger. A future
 
 ### 11.3 Run provenance and unattended operation
 
-The final merge-review receipt records the runtime name and version, resolved provider-qualified model ID, related issue and pull request, intent and plan digests, round counts, base, head, and binary diff digest. The trusted validator binds it to the live `CI / quality` conclusion. Custom agents or prompts are recorded only when they materially differ from runtime defaults.
+The final merge-review receipt records the runtime name and version, resolved provider-qualified model ID, intent and plan digests, round counts, base, head, and binary diff digest. Its GitHub location supplies the pull request identity, and the intent record supplies the issue identity when one exists. The trusted validator binds it to the live `CI / quality` conclusion. Custom agents or prompts are recorded only when they materially differ from runtime defaults.
 
 [Herdr](https://github.com/herdrdev/herdr) may keep sessions alive and permit reconnection; it is execution infrastructure, not workflow authority or a task ledger. A future persistent orchestrator may accept an intent-authorized work item, create an isolated worktree and runtime session, manage internal rounds, wait for high-risk GitHub plan approval, and publish the final merge-ready review. Automatic merge remains out of scope.
 
@@ -308,7 +312,7 @@ The final merge-review receipt records the runtime name and version, resolved pr
 
 - The agent starts from accepted intent or a clearly low-risk direct-pull-request scope, reads repository instructions, inspects live state, and reports conflicts before mutation.
 - The agent creates or uses the issue-specific worktree and branch, changes only in-scope files, and preserves unrelated user work.
-- The agent opens a draft pull request after committing the candidate plan when planning is required, updates that branch through internal plan review, and keeps the pull request's What, Why, and Verification sections current.
+- The agent opens a draft pull request after committing the candidate plan when planning is required, updates that branch through internal plan review, and keeps the pull request's Summary, Changes, Verification, and Related sections current.
 - The agent runs the smallest relevant checks during development and the complete required profile before handoff.
 - The agent performs a fresh self-review and obtains the required fresh-context review rounds without posting normal intermediate rounds to GitHub.
 - The agent may post the final merge-ready review or a terminal blocker handoff but must not merge, tag, release, deploy, or alter credentials without authority.
