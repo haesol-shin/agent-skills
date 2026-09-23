@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This repository is the single entry point for reusable higher-level agent behavior that composes multiple tools or engines, bundles, cross-harness packaging of those workflows, and compatibility declarations. An engine may separately ship at most one thin skill that only translates user intent into its own stable CLI or contract, using a single tool and no semantic interpretation. This repository does not absorb the applications that perform domain work.
+This repository is the single entry point for reusable higher-level agent behavior: workflows that compose multiple tools or engines, bundles, cross-harness packaging of those workflows and bundles, and compatibility declarations. An engine may separately ship at most one thin skill that only translates user intent into its own stable CLI or contract, using a single tool and no semantic interpretation. This repository does not absorb the applications that perform domain work.
 
 ## Ownership model
 
