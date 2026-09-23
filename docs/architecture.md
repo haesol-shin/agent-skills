@@ -2,13 +2,13 @@
 
 ## Purpose
 
-This repository is the single entry point for reusable agent behavior. It owns skills, bundles, cross-agent packaging, and compatibility declarations. It does not absorb the applications that perform domain work.
+This repository is the single entry point for reusable higher-level agent behavior that composes multiple tools or engines, bundles, cross-harness packaging of those workflows, and compatibility declarations. An engine may separately ship at most one thin skill that only translates user intent into its own stable CLI or contract, using a single tool and no semantic interpretation. This repository does not absorb the applications that perform domain work.
 
 ## Ownership model
 
 | Layer | Owns | Does not own |
 | --- | --- | --- |
-| Engine | Authentication, data access, deterministic processing, JSON CLI | Agent prompting or multi-engine workflow |
+| Engine | Authentication, data access, deterministic processing, JSON CLI, at most one thin single-tool skill translating intent to its own stable CLI/contract | Multi-tool or multi-engine workflow/orchestration, semantic interpretation |
 | Skill | When and how an agent uses one bounded capability | Engine implementation or credentials |
 | Bundle | Related skills, user experience, cross-engine workflow, compatibility | Dependency source code |
 | Adapter | Harness-specific manifest and discovery metadata | Canonical skill instructions |
@@ -28,7 +28,7 @@ Use three forms of reference for three different jobs:
 2. Specs link to the engine-owned contract path and name the required schema version.
 3. Released `bundle.toml` and lock data pin a tag or commit plus an integrity hash.
 
-Do not use git submodules. A bundle consumes released CLI contracts rather than importing engine source. Development branches may appear in an experimental bundle, but publication is blocked until every required engine has a reviewed tag.
+Do not use git submodules. A bundle consumes released CLI contracts and may reference an engine-owned thin skill by pinned release rather than copying it; it does not import engine source. Development branches may appear in an experimental bundle, but publication is blocked until every required engine has a reviewed tag.
 
 ## Repository policy
 
