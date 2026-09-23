@@ -14,7 +14,7 @@ Portable agent skills and plugin bundles for recurring research, project, and st
 | --- | --- | --- |
 | `lecture-tools` | Experimental, not runnable | Check and play selected lectures, then build a verified project from authorized course evidence and selected requirements. |
 
-Packages own agent-facing behavior and integration contracts. Standalone engines remain in their own repositories and expose versioned JSON CLIs.
+Packages own higher-level agent-facing behavior and integration contracts; an engine may also ship at most one thin, single-tool skill that translates user intent to its own stable CLI or contract. Standalone engines remain in their own repositories and expose versioned JSON CLIs.
 
 `lecture-tools` currently documents and validates the intended skill boundary. Do not install it for operational use until `bundle.toml` names tagged engine releases and published contracts.
 
