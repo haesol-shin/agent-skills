@@ -198,7 +198,7 @@ campusctl lectures play <entity-id>... [--speed <rate>] --json
 
 The initial contract supports only the lectures sync domain. Lecture lists are incomplete by default; `--all` includes completed records. Lists report local-cache availability and generation time, and a missing cache returns `user-action` with `campusctl sync --only lectures` remediation. The campusctl skill translates direct user intent to this single CLI without semantic interpretation.
 
-Playback validates the explicitly selected IDs before opening a visible official player, then plays serially and closes the player through its normal UI. Completion is reported only when observed in authoritative LMS state; otherwise the item is `unverified`, and it is never retried automatically. Campusctl does not send a separate progress or attendance recalculation request. Whether live observation changes that decision remains open; this contract makes no promise to add one.
+Playback validates the explicitly selected IDs before opening a visible official player, then plays serially and closes the player through its normal UI. Completion is reported only when observed in authoritative LMS state; otherwise the item is `unverified`, and it is never retried automatically. Campusctl does not send a separate progress or attendance recalculation request. A live CNU observation on 2026-09-24 confirmed this is sufficient: the official player's own attendance logging brought the row to its complete state without any extra request.
 
 Commands emit the common JSON envelope to stdout, keep diagnostics on stderr, and use the documented exit codes. Unknown schema versions fail closed. The browser session uses a local persistent profile by default and may attach to an existing CDP endpoint; no resident browser service is required.
 
@@ -456,7 +456,7 @@ Setup, update, rollback, and uninstall must select concrete tagged versions from
 - The campusctl engine skill covers direct lecture catalog and selected playback requests; lecture-to-code remains the only multi-engine skill in this package.
 - `lecture-to-code` may retrieve only explicitly selected assignment, notice, and material sources after the later campusctl commands are released.
 - The plugin never receives, prints, stores, or asks the user to paste an LMS credential.
-- Campusctl plays only explicitly selected lectures in a visible official player and reads completion from authoritative LMS state. It sends no separate progress or attendance recalculation request; if completion is not observed, it reports `unverified`. A later live observation may revisit the open decision but is not promised.
+- Campusctl plays only explicitly selected lectures in a visible official player and reads completion from authoritative LMS state. It sends no separate progress or attendance recalculation request; if completion is not observed, it reports `unverified`.
 - A selected lecture can produce authorized audiovisual evidence through a later released campusctl retrieval method or a user-supplied authorized local file; unavailable capability is reported rather than replaced with transcript-only code generation.
 - If a primary source cannot yield complete audiovisual evidence, stop and report the missing modality instead of generating from transcript-only input.
 - Before external model use, the user sees the destination and lecture-derived data classes and explicitly confirms the warning; the confirmation is repeated when destination or policy changes.
