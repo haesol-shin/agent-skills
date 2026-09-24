@@ -16,9 +16,9 @@ This repository is the single entry point for reusable higher-level agent behavi
 
 Current engines remain independent:
 
-- [`campusctl`](https://github.com/haesol-shin/notice-bot) is the target public CLI extracted from the existing repository. Its CNU implementation remains an internal provider module until another institution proves a stable separation boundary.
-- [`lectural`](https://github.com/haesol-shin/lectural) extracts evidence and study artifacts from supported video sources.
-- `notice-bot` remains the owner's personal scheduled automation application for notifications, tasks, and boards; it may consume campusctl later but does not define the public campus contract.
+- [`campusctl`](https://github.com/haesol-shin/campusctl) is a fresh repository in development for the portable campus-domain CLI and its thin single-tool skill; its CNU provider remains internal until another institution proves a stable separation boundary.
+- [`lectural`](https://github.com/haesol-shin/lectural) extracts evidence and study artifacts from supported video sources and owns its thin CLI skill.
+- `notice-bot` remains the separate scheduled automation application and will consume campusctl after v0; it does not define the public campus contract.
 
 ## External reference policy
 

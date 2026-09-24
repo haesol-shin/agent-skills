@@ -4,23 +4,24 @@ version = "0.1.0"
 status = "experimental"
 
 [engines.campusctl]
-repository = "https://github.com/haesol-shin/notice-bot"
+repository = "https://github.com/haesol-shin/campusctl"
 target_command = "campusctl"
 release = "unreleased"
-source_status = "extraction-planned"
-development_commit = "6377b2cbd8ef7a5c705c1d361f748500d87486f7"
-contract_path = "docs/contracts/lecture-cli.md"
-contract_status = "missing"
+source_status = "in-development"
+contract_path = "docs/contracts/cli.md"
+contract_status = "draft"
 schema_versions = [1]
+skill_path = "skills/campusctl/SKILL.md"
 
 [engines.lectural]
 repository = "https://github.com/haesol-shin/lectural"
-development_ref = "main"
-development_commit = "7d4775f8add3c15317a113d839f2219e4b5426b3"
-release = "review-required"
+release = "v0.3.1"
+source_status = "released"
 contract_path = "docs/contracts/cli.md"
-contract_status = "missing"
-schema_versions = [1]
+contract_status = "published"
+contract_versions = [2]
+schema_versions = [2]
+skill_path = "skills/lectural/SKILL.md"
 
 [targets]
 canonical = "agent-skills"
