@@ -4,32 +4,27 @@
 >
 > **Working name:** `lecture-tools`
 >
-> **Understood as:** define a portable, versioned agent plugin that turns explicitly selected course sources into a verified project satisfying the selected assignment requirements. Lecture video is processed as time-aligned multimodal evidence; briefs, notices, materials, and other lectures provide additional requirements and context. The package also supports course discovery and user-selected visible playback, but excludes submission, grading-state mutation, Google Tasks, digests, scheduled playback, and other unattended campus automation.
+> **Understood as:** define a portable, versioned multi-engine workflow that turns explicitly selected course sources into a verified project satisfying selected assignment requirements. Lecture video is processed as time-aligned multimodal evidence; selected course documents add requirements and context. Direct lecture discovery and playback belong to campusctl's separate engine-owned skill; submission, grading-state mutation, Google Tasks, digests, scheduled playback, and unattended campus automation remain excluded.
 
-The checked-in `0.1.0` manifest is a design version, not a published or operational release. The package remains non-runnable while `bundle.toml` lists an unreleased engine or missing contract.
+The checked-in `0.1.0` manifest is a design version, not a published or operational release. The package remains non-runnable while campusctl is unreleased and its CLI contract is draft.
 
 ## 1. Purpose
 
-`lecture-tools` is the bundle and installation unit. It gives a student using a supported campus provider a natural-language interface for four actions:
+`lecture-tools` is the bundle and installation unit for `lecture-to-code`, a multi-engine workflow. Direct campus requests use campusctl's engine-owned `skills/campusctl/SKILL.md`; that skill is referenced through bundle metadata, not copied into this package.
 
-1. Refresh the enrolled lecture catalog.
-2. List incomplete lecture videos.
-3. Play only the lecture videos the user explicitly selects, in order and in a visible official player, then report the LMS's authoritative completion state.
-4. Turn authorized lectures and explicitly selected course context into a verified project that satisfies the selected assignment requirements and remains grounded in source evidence.
-
-`lecture-to-code` is the bundle's primary value path, not an optional integration. It accepts one or more authorized lecture sources plus explicitly selected assignment briefs, notices, materials, and supporting lectures. It derives an explicit requirement set, uses the selected sources to implement the requested project, and verifies the deliverable against both the requirements and applicable executable checks. A runnable release must provide at least one end-to-end audiovisual input path for a supported source. For v0, an explicitly supplied authorized local media file qualifies; provider-integrated retrieval remains the preferred path and must advertise unavailability rather than silently degrading to text-only input.
+`lecture-to-code` accepts authorized lecture sources plus explicitly selected assignment briefs, notices, materials, and supporting lectures. It derives an explicit requirement set, implements the requested project from selected evidence, and verifies the deliverable against the requirements and applicable executable checks. A runnable release must provide an end-to-end audiovisual input path. An explicitly supplied authorized local media file qualifies for v0; provider-integrated retrieval follows in a later campusctl slice and must report unavailability rather than silently degrading to text-only input.
 
 The plugin is an orchestration and instruction layer. It does not absorb the two engines:
 
-- `campusctl` owns the portable campus-domain CLI, authentication abstraction, course-source discovery and retrieval, playback orchestration, LMS completion verification, and institution provider modules. It converts the user's authorized LMS session into local source packages or media without exposing browser handles, cookies, tokens, or URLs that require the private session to resolve. The CNU provider remains inside campusctl for v0 and is extracted only after another provider proves a stable shared boundary.
-- `lectural` owns deterministic extraction of time-aligned transcript, representative frames, OCR annotations, synthesis inputs, notes, and extraction completeness from supported media. It does not decide what a frame means to an assignment or whether a project should be generated.
-- `notice-bot` remains the owner's personal application for schedules, notifications, Google Tasks, boards, and other unattended automation. It may consume campusctl once the public CLI exists but does not own the public campus contract.
+- `campusctl` is a fresh repository for the portable campus-domain CLI, authentication abstraction, and CNU provider. Its first slice is `doctor`, `auth`, lecture-only sync, course and lecture listing, explicit visible playback, and its own thin single-tool skill. Assignment, notice, material, and media retrieval follow after v0.
+- `lectural` owns deterministic extraction of time-aligned transcript, frames, OCR annotations, and extraction completeness from supported media. Its own thin skill routes intent to its CLI; neither the engine nor skill decides what a frame means to an assignment or whether a project should be generated.
+- `notice-bot` remains the separate scheduled automation application and will consume campusctl after v0; it does not own the public campus contract.
 
-The engines remain independently versioned processes joined by stable JSON CLI contracts.
+The engines remain independently versioned processes joined by stable JSON CLI contracts. Engine-owned thin skills remain in their respective repositories and are referenced, not copied.
 
 ### 1.1 Document ownership
 
-This document owns the agent-facing product and integration contract. Engine-specific command schemas belong to their engine repositories and are referenced through `bundle.toml`; they are not copied here once published. README links follow the current default branch for navigation, while a released bundle pins exact tags or commits for reproducibility. Git submodules are not used.
+This document owns the agent-facing product and integration contract. Engine-specific command schemas and thin skills belong to their engine repositories and are referenced through `bundle.toml`; their content is not copied here. Human-facing README links support navigation, while a released bundle pins exact engine tags for reproducibility. Git submodules are not used.
 
 ## 2. Scope
 
@@ -38,11 +33,9 @@ This document owns the agent-facing product and integration contract. Engine-spe
 - One-time laptop setup with the fewest possible user-run commands.
 - An OS-keyring credential provider for the portable `campusctl` runtime.
 - Read-only runtime and dependency diagnosis through `doctor`.
-- Selective synchronization and read-only listing of lectures, assignments, notices, and materials, including their LMS structural context.
-- Retrieval of an explicitly selected assignment or notice as a local source package containing structured text, embedded images, attachments, provenance, and available deadline metadata.
-- Explicit user-selected playback queues, processed serially in a visible official player with an officially supported speed.
-- Read-only verification of the provider's authoritative completion state after playback; the plugin never writes or fabricates attendance or progress.
-- Provider-declared media retrieval through an official download or policy-permitted live capture; an authorized local file bypasses campusctl and goes directly to LecturAL.
+- Direct catalog and playback requests use campusctl's separate engine skill, not a skill included in `lecture-tools`.
+- Retrieval of explicitly selected assignments, notices, and materials as local source packages is later campusctl scope.
+- Provider-declared media retrieval and authorized local input feed LecturAL; LMS media retrieval follows the initial campusctl slice.
 - LecturAL evidence extraction with speech and visual completeness, explicit OCR state, retained representative frame images, and time-aligned artifact references. Transcript-only evidence is insufficient for a primary lecture source.
 - Requirement-driven agent generation grounded in the selected assignment brief, notices, materials, lectures, transcript, frame images, OCR annotations, and timestamps.
 - Vision inspection of relevant frame images whenever the deliverable depends on displayed code, commands, outputs, diagrams, or other visual state. OCR is a retrieval and transcription aid, not a substitute for the source image.
@@ -79,58 +72,44 @@ Setup is a future trusted installer entrypoint, separate from the credential-fre
 - creation of user config/data/cache directories;
 - installation of the exact tagged engine versions selected by `bundle.toml` and preparation of their independent locked Python environments;
 - Chromium and `ffmpeg` checks;
-- private OS-keyring credential entry through a direct user-run prompt;
-- an initial campusctl sync; and
+- campusctl authentication through its `auth` command, with the OS keyring as laptop default and a command helper for unattended hosts;
+- an initial `campusctl sync --only lectures`; and
 - a final aggregate doctor run.
 
-Credential entry must occur outside LLM-visible input and output. If the host cannot provide a private prompt, setup stops with one exact remediation rather than accepting a password in an argument, environment variable, chat message, redirected stdin, or config file.
+For keyring setup, credential entry must occur outside LLM-visible input and output. If the host cannot provide a private prompt, setup stops rather than accepting a password in argv, an environment variable, chat, redirected stdin, or config. Unattended hosts use the configured command-helper provider instead.
 
-The default credential backend is the platform's recommended keyring: Windows Credential Manager, macOS Keychain, or a supported Linux Secret Service/KWallet backend. Setup rejects plaintext and insecure fallback backends. Browser-managed interactive SSO may be used instead when the provider supports it; SSO is an authentication flow, while keyring is credential storage.
+The OS keyring is the laptop default. A configured command helper is the alternative for unattended hosts; neither path stores a secret in plaintext configuration. Browser-managed interactive SSO may be used instead when the provider supports it.
 
 ### 3.2 Normal use
 
 After setup, the user interacts in natural language. Representative requests are:
 
-- “남은 강의 확인해줘.”
-- “3주차 강의 틀어줘.”
 - “영상에서 작성한 코드를 프로젝트로 옮겨줘.”
 
-The plugin may run internal commands. The user is not asked to translate intent into CLI flags. If multiple lectures match, it presents a short disambiguation list and performs no mutation until the user selects one.
-
-A request may select a finite ordered queue. The plugin validates the whole queue before opening the visible player, runs one lecture at a time, and advances only after normal player termination and a bounded authoritative status check. An unresolved status pauses the queue; it is never treated as successful completion or retried automatically.
-
-`check-lectures` invokes `campusctl sync --only lectures` only when the request requires current data, then reads the lecture list.
+The `lecture-to-code` skill clarifies ambiguous source or requirement selections before retrieval. Direct sync, listing, and playback requests use campusctl's own skill, not a parallel skill in this bundle.
 
 ## 4. Architecture
 
 ```text
 User
-  |
-  v
-lecture-tools plugin
-  |-- check-lectures skill
-  |-- play-lecture skill
-  |-- lecture-to-code skill
-  `-- lecture-tools-runtime (credential-free orchestrator)
-          |                         |
-          | JSON/argv               | JSON/argv
-          v                         v
-   campusctl CLI             lectural CLI
-   own uv.lock/env            own uv.lock/env
-          |                         |
-          v                         v
- campus provider            local evidence artifacts
- (for example CNU)          and coverage
-          |
-          v
- campus LMS + OS keyring
+  |-- direct campus intent --> campusctl-owned skill --> campusctl CLI --> campus LMS
+  |-- direct evidence intent --> LecturAL-owned skill --> lectural CLI --> local evidence
+  `-- project derivation --> lecture-tools plugin
+                               `-- lecture-to-code skill
+                                    |
+                                lecture-tools-runtime
+                                    | JSON/argv       | JSON/argv
+                                    v                 v
+                                campusctl CLI     lectural CLI
 ```
+
+Engine-owned skills are standalone thin entrypoints. They are not children of the lecture-tools plugin; its `lecture-to-code` skill alone composes both CLIs.
 
 `lecture-tools-runtime` is a dependency-free, standard-library-only process orchestrator. It passes every argument as an argv item, never constructs shell command strings, never imports either engine as a library, and never reads their private state files, configs, browser profiles, keyrings, or internal modules.
 
 The product uses three durable abstractions:
 
-- A **source record** identifies one user-selected lecture, assignment brief, notice, or material and records its provenance, LMS structural context, authorization basis, role, and retention rule. `campusctl` retrieves provider-backed source packages and media through the authorized LMS session; the runtime owns the job-local record.
+- A **source record** identifies one user-selected lecture, assignment brief, notice, or material and records its provenance, LMS structural context, authorization basis, role, and retention rule. Campusctl v0 supplies the lecture catalog and playback; later released retrieval commands provide selected course packages or media. The runtime owns the job-local record.
 - An **evidence bundle** is LecturAL's time-aligned, machine-readable transformation of one lecture medium. It references transcript segments, representative frame images, OCR annotations, timestamps, and extraction-completeness results without interpreting their assignment meaning.
 - A **verified deliverable** is the generated project plus a requirement checklist that maps each selected requirement to implementation evidence, course-source evidence, and executable verification where applicable.
 
@@ -148,14 +127,11 @@ Every selected source has one job-local role:
 
 The skill presents candidates and resolves ambiguity with the user before retrieval. The runtime records only the resulting explicit selection and rejects a job with no `requirement` source or no audiovisual `primary` source. A direct user request may itself be the requirement source. Local audio is always `supporting`.
 
-`campusctl` keeps its portable core and institution providers as separate modules in one repository for v0. The core contains domain models, JSON contracts, capability negotiation, and credential interfaces; the CNU provider contains institution-specific login, URLs, selectors, course structure, rich-content retrieval, media access, status mapping, player behavior, and policy metadata. Browser automation or authenticated session reuse is a provider implementation detail. The public contract returns local artifacts, stable opaque entity references, and safe metadata, never live page handles, cookies, tokens, or URLs that require a private session to resolve. Provider code becomes a separate package or repository only after at least two implementations prove the boundary. `notice-bot` remains a personal scheduled automation application and is not the public campus engine or provider.
+`campusctl` is a fresh repository whose v0 contract starts with diagnosis, authentication, lecture-only synchronization, course and lecture listing, and explicit visible playback. The local persistent browser profile is the default, with optional attachment to an existing CDP endpoint; no resident service is required. The initial CLI does not include assignment, notice, material, or media retrieval. Those capabilities follow v0.
 
 ### 4.1 Dependency isolation
 
-The engines must not share a Python environment. Their current dependency constraints conflict:
-
-- campusctl currently requires `numpy>=2.4.6` and `onnxruntime>=1.29.0`.
-- LecturAL currently requires NumPy below 2 and ONNX Runtime below 1.24, with an older bounded OpenCV stack.
+The engines own separate dependency lockfiles and environments. The runtime integrates them through their JSON CLIs and never imports either engine or shares its private state.
 
 Each engine therefore owns its `pyproject.toml`, `uv.lock`, and environment. Production plugin invocations use the equivalent of:
 
@@ -167,7 +143,7 @@ uv run --project <engine-root> --locked <engine-command> ...
 
 ## 5. Public CLI Contracts
 
-Every command in this section is a target interface unless explicitly marked as already implemented. Existing flags are not accepted as substitutes until they satisfy these contracts. Each engine must publish its command-specific JSON Schema before this package becomes runnable; `lecture-tools` keeps consumer fixtures but does not become a second owner of those schemas.
+Each engine owns its command-specific JSON schemas; `lecture-tools` consumes those contracts without copying their schemas. A release must pin each required engine release and supported schema versions.
 
 Human-readable output is allowed for direct use, but every plugin-consumed command must support pure JSON on stdout. Diagnostics go to stderr only when JSON output cannot be produced.
 
@@ -177,7 +153,7 @@ Human-readable output is allowed for direct use, but every plugin-consumed comma
 {
   "schema_version": 1,
   "tool": "campusctl",
-  "tool_version": "0.2.0",
+  "tool_version": "0.1.0",
   "status": "ok",
   "result": {},
   "errors": [],
@@ -207,74 +183,45 @@ Common process exit codes:
 
 ### 5.2 campusctl surface
 
-Required commands:
+The campusctl draft contract is at `docs/contracts/cli.md`, uses JSON schema version 1, and describes this unreleased first slice:
 
 ```console
 campusctl --version --json
 campusctl doctor --json
-campusctl sync [--course <course-id>] [--only lectures,assignments,notices,materials] --json
+campusctl auth set --json
+campusctl auth status [--check] --json
+campusctl sync [--course <course-id>] [--only lectures] --json
 campusctl courses list --json
 campusctl lectures list [--course <course-id>] [--all] --json
 campusctl lectures play <entity-id>... [--speed <rate>] --json
-campusctl lectures fetch-media <entity-id> --out <directory> [--method download|live-capture] [--policy-ack <version>] --json
-campusctl assignments list [--course <course-id>] --json
-campusctl assignments fetch <entity-id> --out <directory> --json
-campusctl notices list [--course <course-id>] --json
-campusctl notices fetch <entity-id> --out <directory> --json
-campusctl materials list [--course <course-id>] --json
-campusctl materials download <entity-id> --out <directory> --json
 ```
 
-Contract requirements:
+The initial contract supports only the lectures sync domain. Lecture lists are incomplete by default; `--all` includes completed records. Lists report local-cache availability and generation time, and a missing cache returns `user-action` with `campusctl sync --only lectures` remediation. The campusctl skill translates direct user intent to this single CLI without semantic interpretation.
 
-- `sync` refreshes all enabled domains by default. `--course` bounds synchronization to one course, and `--only` restricts it to the named domains. Synchronization updates metadata and text records only; it never plays lectures, fetches media, downloads material files, submits work, or invokes Google Tasks, notification delivery, or digests.
-- `lectures list` returns incomplete lecture records only; `--all` also includes completed records. Neither form returns assignment fields or records.
-- Each list response reports whether it came from an available local cache and when that cache was generated. A missing cache returns `user-action` with `campusctl sync` remediation; skills never infer cache availability from private files.
-- Domain `list` commands return only their own record type. `assignments fetch` and `notices fetch` retrieve one explicitly selected local source package; `materials download` retrieves only the selected file.
-- Every course item record includes an opaque stable `entity_id`, course identity and label, item kind, title, and provider-normalized structural coordinates when available: week, session or section, sequence, container ID, and ordered sibling entity IDs. These fields expose LMS structure, not semantic relevance; the skill decides which nearby items are candidate context and still requires explicit selection before retrieval.
-- An assignment record additionally includes submission window and deadline metadata when available. A lecture record additionally includes duration when known and LMS completion state.
-- A retrieved assignment or notice package contains a manifest, structured text, embedded images, every source-referenced attachment available under the provider policy, content digests, source provenance, and unavailable-asset diagnostics. An image or attachment referenced by the source is not flattened into OCR text or silently discarded; an unavailable or policy-excluded asset remains explicit in the manifest. All package paths resolve beneath `--out`.
-- Consumers never parse `entity_id`. Any ID-scheme change requires the provider to publish and test an alias/backfill migration before release; no undocumented repository-local dedupe rule is part of the public contract.
-- `lectures play` validates every ID before opening a browser.
-- Playback uses a visible official player, is ordered as requested, runs one item at a time, and returns one result per ID. Validation failure is atomic; runtime failure is `partial` and leaves later unstarted IDs explicit.
-- Playback uses only controls and rates exposed by the official player. When `--speed` is omitted it uses the provider's declared default; `doctor --json` reports the default and supported rates, and an unsupported explicit rate returns `user-action` before playback. Playback does not hide the browser, run concurrent videos, skip required content, or simulate user presence.
-- `campusctl` records local playback observations separately from LMS state. It reports completion only after the provider reads its authoritative finished state; elapsed local time or a player end event alone is insufficient. Provider-specific raw values such as the current Panopto `F` are mapped to a versioned portable enum rather than exposed as the cross-provider contract.
-- `lectures fetch-media` prepares one LMS lecture as local media for evidence extraction through the current authorized LMS session and never sends attendance or progress-mutation requests. It supports only the provider-declared methods `download` and `live-capture`; a local file is a separate input source and bypasses campusctl.
-- The command uses `download` by default when available. It never falls back automatically to `live-capture`; that method requires `--method live-capture`, provider permission, and explicit user confirmation because visible playback may update LMS progress incidentally. The result reports any observed authoritative state without claiming the operation was read-only.
-- If `download` is unavailable and `live-capture` is available, the command returns `user-action` with the available method and current policy version. After user confirmation, `lecture-tools-runtime` supplies that exact version through `--policy-ack`; a stale or missing acknowledgement fails without opening the player.
-- An authorized lecture is reachable through the current user's enrolled LMS session and normal media entitlement; the command does not bypass access controls. For a direct local file, the user explicitly attests that they are permitted to extract it.
-- Source-package retrieval and `fetch-media` write only beneath the requested, resolved output directory. Their JSON responses return safe local artifact paths, provenance, authorization basis, retention requirements, and operation-specific metadata. `fetch-media` additionally returns media metadata, selected method, provider policy version, and incidental progress behavior. `lecture-tools-runtime` converts these results into its own `source.json`; campusctl does not own the integration manifest.
-- Busy scheduled browser work exits 75 without a source-error alert.
+Playback validates the explicitly selected IDs before opening a visible official player, then plays serially and closes the player through its normal UI. Completion is reported only when observed in authoritative LMS state; otherwise the item is `unverified`, and it is never retried automatically. Campusctl does not send a separate progress or attendance recalculation request. A live CNU observation on 2026-09-24 confirmed this is sufficient: the official player's own attendance logging brought the row to its complete state without any extra request.
 
-Every command supports `--json`, writes its response to stdout, writes diagnostics to stderr, uses stable opaque entity IDs, and follows the common response envelope and exit codes. Commands that create artifacts return explicit resolved output paths. Consumers use only these CLI contracts and never read campusctl's private JSON cache or CNU provider modules.
+Commands emit the common JSON envelope to stdout, keep diagnostics on stderr, and use the documented exit codes. Unknown schema versions fail closed. The browser session uses a local persistent profile by default and may attach to an existing CDP endpoint; no resident browser service is required.
+
+Assignment, notice, and material listing or retrieval, plus `fetch-media`, are later campusctl scope and are not available in this first slice. Do not invoke those commands until a later engine contract releases them.
 
 ### 5.3 LecturAL surface
 
-LecturAL accepts YouTube sources and local `.mp4`, `.webm`, `.mkv`, and `.wav` files. Before integration it must expose:
+The released LecturAL engine is pinned to `v0.3.1`. Its published CLI and evidence contract is [`docs/contracts/cli.md`](https://github.com/haesol-shin/lectural/blob/v0.3.1/docs/contracts/cli.md); contract version and JSON Schema version are both 2. The version response advertises supported versions `[2]` for both.
 
 ```console
-lectural --version --json
-lectural doctor --json
-lectural extract <source> --out <directory> [--skip-ocr] --json
+lectural --version [--json]
+lectural extract <source> --out <new-directory> [--skip-ocr] --json
+lectural inspect <bundle-directory-or-evidence.json> [--json]
+lectural verify <bundle-directory-or-evidence.json> [--source <file-or-URL>] [--json]
+lectural notes <input>... [--out <root>] [--force-stt] [--model <model>] [--skip-ocr] [--keep-frames]
+lectural doctor [--fix] [--plugin] [--json]
 ```
 
-The existing bare-source syntax may remain as a backward-compatible alias. The public extraction command accepts exactly one source per invocation so each output directory has one owner and failures cannot create ambiguous partial batches. JSON run output returns:
+The bare-source form is removed. `extract` accepts one YouTube or local media source and requires a new output directory. It writes `evidence.json`, `transcript.md`, and retained video frames; notes, synthesis input, and coverage are created separately by `lectural notes`. `inspect` inventories a bundle, and `verify` performs deterministic structural, containment, hash, identifier, timestamp, completeness, and optional source checks; it is not fact-checking.
 
-- normalized input kind;
-- output directory;
-- `evidence.json`, `transcript.md`, `notes.md`, `synthesis_input.json`, and `coverage.json` paths;
-- frame directory when applicable;
-- extraction-completeness result as `pass`, `warn`, or `fail`, with machine-readable reasons;
-- separate speech and visual completeness plus timestamp integrity and OCR state, with OCR reported as `skipped`, `completed-no-text`, `completed-with-text`, or `failed`; and
-- a bounded failure code and safe message when unsuccessful.
+The v2 evidence manifest uses `schema_version: 2` and `contract_version: 2`. It contains the source identity, speech provenance, interval-bearing transcript segments, hashed frames, extraction completeness, and observational resources. The extraction status is `pass`, `warn`, or `fail`; only `pass` qualifies primary evidence. Explicit `--skip-ocr` remains usable because retained frames are available for visual inspection.
 
-`evidence.json` is the machine-readable manifest for the extraction run: it records source kind, artifact paths, extraction summaries, status, and safe failure metadata. It references rather than duplicates transcript, frame, OCR, notes, and synthesis content. Every retained representative frame remains addressable with its source timestamp whether OCR succeeds, produces no text, is skipped, or fails. LecturAL may use OCR to annotate and index frames, but it must not discard the only retained visual evidence solely because OCR could not classify or read it.
-
-LecturAL accepts a local media path or a supported YouTube URL. The runtime assigns every selected input an opaque job-local `source_id` before extraction and gives LecturAL the empty `evidence/<source-id>/` directory. A preexisting or nonempty output directory fails before work begins. Direct local files and YouTube URLs require the same user authorization attestation recorded by the runtime; LecturAL validates source syntax and access but does not decide authorization.
-
-Only extraction `pass` permits the plugin to claim that a primary lecture was processed completely enough for the derivation workflow. OCR failure blocks a run that requested OCR; explicit `--skip-ocr` remains usable because representative frame images are retained for direct inspection. Local audio and other transcript-only input may contribute supporting context but cannot satisfy the primary audiovisual-source requirement. `warn` may produce a clearly labeled study artifact but cannot serve as complete primary evidence, and `fail` stops processing for that source. LecturAL owns and versions extraction criteria only; it does not classify code scenes, judge assignment relevance, or return project/build eligibility.
-
-The plugin runs the LecturAL project through its checked-in lockfile. Published documentation must not recommend an unlocked `uvx --from ".[run]"` path for the plugin workflow.
+The engine owns its thin skill at [`skills/lectural/SKILL.md`](https://github.com/haesol-shin/lectural/blob/v0.3.1/skills/lectural/SKILL.md). `lecture-tools` references that release and the contract in bundle metadata without copying the skill or schemas.
 
 ### 5.4 Plugin runtime surface
 
@@ -293,7 +240,7 @@ lecture-tools job validate --job <job-root> --stage derivation|complete --json
 lecture-tools job cleanup --job <job-root> --json
 ```
 
-`setup` is an idempotent, direct user-run installer operation and is never invoked by a skill. Interactive mode may open the private credential prompt described in Section 3. In JSON mode it never requests or accepts a secret; it reports completed phases and returns `user-action` with the exact private continuation step when credentials or browser SSO are required. Re-running setup preserves compatible installations and user data, repairs only explicitly approved plugin-owned paths, and never upgrades across an incompatible pinned bundle.
+`setup` is an idempotent, direct user-run installer operation and is never invoked by a skill. Interactive mode may use the campusctl credential method configured through `auth`. In JSON mode it never requests or accepts a secret; it reports completed phases and returns `user-action` with the exact private continuation step when credentials or browser SSO are required. Re-running setup preserves compatible installations and user data, repairs only explicitly approved plugin-owned paths, and never upgrades across an incompatible pinned bundle.
 
 The default doctor is read-only and aggregates:
 
@@ -315,10 +262,12 @@ Every job command follows the common response envelope and exit codes. Mutating 
 
 ## 6. Lecture-to-Code Workflow
 
-1. Resolve the assignment or requested outcome, one or more primary lecture sources, and candidate supporting lectures, notices, or materials. Use campusctl's LMS structural context to surface nearby items, such as an assignment-introduction video in the same session, without treating proximity as semantic proof. Show the candidates and their relevance before retrieval; only explicitly selected items enter the job.
+This workflow is future scope beyond the campusctl v0 lecture slice. It remains unavailable until later campusctl source-retrieval commands and the multi-engine bundle are released.
+
+1. Resolve the assignment or requested outcome, one or more primary lecture sources, and candidate supporting lectures, notices, or materials. Use campusctl's LMS structural context to surface nearby items without treating proximity as semantic proof. Show candidates and relevance before retrieval; only explicitly selected items enter the job.
 2. Before a hosted agent or any external LLM receives new lecture-derived metadata, transcript, OCR, frames, or other evidence, the skill shows a concise disclosure identifying the destination, data classes, purpose, retention facts known to the plugin, and the provider's policy warning. The runtime records and validates the user's explicit confirmation before returning that payload. Cache only the confirmation record and policy version, never the lecture data or credentials. Repeat the disclosure when the provider policy, external destination, or newly requested data class changes.
 3. External-LLM handling is `warn-and-confirm`, not a general policy hard gate: after confirmation, the workflow continues. Confirmation does not create permission or override access controls, copyright restrictions, or institutional rules; responsibility remains with the user. Minimize disclosure to the source excerpts needed for the current derivation and never upload the raw media file.
-4. Assign every selected input a unique opaque job-local `source_id`. For each LMS lecture, run `campusctl lectures fetch-media` to produce local media; for an explicitly supplied authorized local file or YouTube URL, skip campusctl. Retrieve each selected assignment or notice as a campusctl source package and each selected material through its dedicated campusctl command. Preserve embedded images and attachments as original source evidence rather than replacing them with extracted text. In every case, `lecture-tools-runtime` writes the source manifest and records the user's selection and any required authorization attestation.
+4. Assign every selected input a unique opaque job-local `source_id`. After the later campusctl retrieval extension is released, use it for explicitly selected LMS media and course documents; until then, do not invoke planned retrieval commands. Authorized local files and supported YouTube URLs bypass campusctl. Preserve embedded images and attachments as original source evidence rather than replacing them with extracted text. The runtime writes the source manifest and records user selection and any required authorization attestation.
 5. Normalize the selected assignment brief and user request into `requirements.json`: an ordered checklist of required behavior, constraints, deliverables, and verification conditions, each retaining its source provenance. Compare the checklist back to every selected requirement source before implementation so an omitted requirement cannot disappear from later verification. Do not invent missing requirements; surface a blocking ambiguity when materially different implementations remain possible.
 6. Run `lectural extract ... --json` against each selected lecture medium to produce an `evidence.json` and referenced artifacts, then create `evidence-set.json` linking every selected source, its role, and its provenance without copying artifact content.
 7. Require extraction `pass` for every primary lecture. OCR failure blocks a run that requested OCR; explicit OCR skipping is valid because the agent can inspect retained frames directly. Text-only sources may constrain the work but cannot replace the primary audiovisual evidence.
@@ -338,7 +287,7 @@ State is file-based in v0. A user-approved job root has one fixed layout:
   sources/<source-id>/source.json
   sources/<source-id>/<temporary-media-or-selected-context>
   evidence/<source-id>/evidence.json
-  evidence/<source-id>/<transcript-frames-ocr-notes>
+  evidence/<source-id>/<transcript-frames>
   project/<generated-code>
   verification.json
 ```
@@ -362,18 +311,12 @@ The provider's declared retention rule is the upper bound. Within it, temporary 
 
 ## 7. Plugin and Skill Layout
 
-The current repository contains the manifest, bundle metadata, and three guarded skill drafts. The target runnable-release layout adds the orchestration runtime:
+The lecture-tools package contains one multi-engine skill draft. Engine-owned skills stay in their repositories and are referenced through pinned release metadata, never copied into this package. The target runnable-release layout adds the orchestration runtime:
 
 ```text
 lecture-tools/
   .codex-plugin/plugin.json
   skills/
-    check-lectures/
-      SKILL.md
-      agents/openai.yaml
-    play-lecture/
-      SKILL.md
-      agents/openai.yaml
     lecture-to-code/
       SKILL.md
       agents/openai.yaml
@@ -382,7 +325,9 @@ lecture-tools/
   bundle.toml
 ```
 
-The plugin is the install/update/remove unit; a skill is one bounded behavior. `skills/` is the canonical source. Native metadata may live beside a skill, such as `agents/openai.yaml`; generated or larger harness adapters belong under `adapters/` when introduced. Codex is the first supported adapter; other harnesses are not claimed until their adapters pass the same contract tests. Skills are separate because catalog access is read-only, playback has external effects and status checks, and lecture-to-code is expensive and artifact-producing. A separate `study-lecture` skill is not part of v0: LecturAL already owns evidence extraction and notes, while `lecture-to-code` owns the distinct verified-code outcome. Add another skill only when an independently triggered study workflow exists.
+The campusctl skill is `skills/campusctl/SKILL.md` in the fresh campusctl repository and is currently marked `unreleased`; no tagged release is available yet. LecturAL's engine-owned skill is pinned at [`v0.3.1/skills/lectural/SKILL.md`](https://github.com/haesol-shin/lectural/blob/v0.3.1/skills/lectural/SKILL.md). `bundle.toml` records both paths and release states.
+
+The plugin is the install/update/remove unit; a skill is one bounded behavior. `skills/` is the canonical source. Native metadata may live beside a skill, such as `agents/openai.yaml`; generated or larger harness adapters belong under `adapters/` when introduced. Codex is the first supported adapter; other harnesses are not claimed until their adapters pass the same contract tests. The single `lecture-to-code` skill owns the expensive, artifact-producing multi-engine workflow; direct campus requests remain in the campusctl skill. A separate study skill is not part of v0 because LecturAL already owns evidence extraction and notes.
 
 Skill rules:
 
@@ -390,18 +335,16 @@ Skill rules:
 - Put substantial mode procedure or output rules in an explicitly routed reference.
 - Use generic examples; never include personal course names, IDs, paths, endpoints, or host data.
 - Call only documented CLI commands.
-- Never call credential setup, keyring APIs, private state files, or provider modules directly.
-- Treat playback and lecture-to-code as explicit user actions.
+- Never read credentials, keyrings, private state files, browser profiles, or provider modules directly.
+- Treat lecture-to-code as an explicit user action; campusctl's skill owns direct playback requests.
 - Use capability/schema checks before acting and stop on incompatible versions.
 - Bound retries; busy or unknown execution state never proves non-execution.
 
 ## 8. Credentials and Privacy
 
-The portable credential implementation belongs to campusctl and uses the maintained Python `keyring` interface with the platform's recommended backend. The campusctl provider stores the password under a stable logical service name and local account identifier; config contains only the provider, account identifier, and `credential_provider = "keyring"`. Setup delegates credential entry to a direct campusctl private terminal or native prompt. Only the campusctl provider process reads the credential when authentication is required, fills the official login DOM, releases the reference promptly, and never serializes or logs it. `lecture-tools-runtime` remains credential-free.
+Campusctl owns credential handling. Its laptop default is the OS keyring; unattended hosts may configure a command helper. The helper is invoked as an argv array without a shell and returns `{"username": "...", "password": "..."}` as JSON on stdout. Secrets never appear in environment variables, argv, persistent plaintext configuration, logs, or public responses; the orchestration runtime remains credential-free.
 
-The supported defaults are Windows Credential Manager, macOS Keychain, and a recommended Linux Secret Service or KWallet backend. `doctor` reports an unavailable or insecure backend as `user-action`; it never falls back to plaintext, environment variables, redirected stdin, or an alternate file keyring. Interactive browser SSO may avoid password retrieval when a provider supports it. Vaultwarden is not a public dependency or recommended setup path.
-
-This provides normal-operation non-disclosure, not protection against arbitrary malicious code running as the same OS user. Hard isolation from a same-user agent requires a separately-owned broker or service and is a future security tier. Documentation must state this boundary without claiming that keyring alone is an application sandbox.
+Authentication uses only the selected provider process. The local persistent browser profile is the default session; an existing CDP endpoint is an optional attach mode. No resident browser service is required.
 
 Tests must prove that fake secrets do not survive in `str()`/`repr()` of public exceptions, JSON, stdout, stderr, logs, or setup status. Tests use a fake keyring and never touch a real credential store.
 
@@ -409,30 +352,19 @@ External model processing is a separate disclosure boundary from credentials. Th
 
 ## 9. Versioning and Compatibility
 
-No released plugin may depend on a mutable branch. LecturAL's local-source support is merged, but it must ship in a tagged release together with the required extraction contract before entering a released compatibility matrix.
+No released plugin may depend on a mutable branch. LecturAL is pinned to tagged release `v0.3.1`, whose published CLI and evidence contract are at `docs/contracts/cli.md` (contract version 2, JSON Schema version 2). Campusctl remains unreleased with a draft contract; the compatibility matrix cannot include a released plugin until campusctl has a reviewed tag.
 
-`bundle.toml` pins supported ranges and JSON contract versions once releases exist, for example:
+`bundle.toml` records engine releases, contract paths and status, skill paths, and supported schema versions. For example, the current LecturAL entry pins its published contract and skill:
 
-```toml
-[plugin]
-version = "0.1.0"
+[engines.lectural]
+release = "v0.3.1"
+contract_path = "docs/contracts/cli.md"
+contract_status = "published"
+contract_versions = [2]
+schema_versions = [2]
+skill_path = "skills/lectural/SKILL.md"
 
-[campusctl]
-versions = ">=0.2,<0.3"
-default_version = "0.2.1"
-schema_versions = [1]
-
-[campusctl.providers]
-required = ["cnu"]
-contract_versions = [1]
-
-[lectural]
-versions = ">=0.2,<0.3"
-default_version = "0.2.0"
-schema_versions = [1]
-```
-
-Ranges define accepted existing installations; each plugin release's exact `default_version` values define reproducible fresh setup and rollback targets.
+Each engine's release and supported schema versions in `bundle.toml` define the reproducible install and compatibility target.
 
 Patch releases preserve CLI and schema compatibility. Minor releases may add optional fields and capabilities. Incompatible CLI or schema changes require a major version or a parallel versioned command/response contract.
 
@@ -450,13 +382,13 @@ Each repository follows GitHub Flow:
 
 The PR template contains `Summary`, `Scope and impact`, `Documentation`, and `Verification`. Verification records exact commands, results, and anything not verified. CI runs on every PR and on `main`; release publication runs only from a version tag after the same gates pass.
 
-Before the first tagged release, each repository must have a license, README, contribution guide, security reporting policy, changelog/release policy, secret-history audit, and clean install test. The campusctl public split still requires its planned history rewrite and private/public boundary review.
+Before a public release, each repository must meet its license, contribution, security-reporting, changelog, secret-history, and clean-install gates.
 
 The intended responsibility split is:
 
 - `agent-skills`: public bundles, canonical skills, compatibility metadata, and profiles;
-- `campusctl`: portable campus-domain CLI, capability and policy contracts, plus the CNU provider as an internal module for login, discovery, course structure, rich-source retrieval, player, status, media retrieval, and policy metadata;
-- `notice-bot`: the owner's personal schedules, notifications, Google Tasks, boards, SQLite-backed deduplication, and any private capabilities outside the public campus contract; it may later consume campusctl rather than being absorbed by it; and
+- `campusctl`: a fresh repository (private and personal-first for now, with a public release planned later) for the portable campus-domain CLI, its thin single-tool skill, and CNU provider modules for login, discovery, course structure, playback, and completion status; richer course-source retrieval follows v0;
+- `notice-bot`: the separate scheduled automation application for notifications, tasks, and boards; it will consume campusctl after v0; and
 - `lectural`: time-aligned audiovisual evidence extraction, extraction completeness, and study artifacts.
 
 Reusable browser mechanics remain provider-local until at least two independent providers prove a stable shared contract. A shared library is extracted only when it has independent consumers, tests, versioning, and release ownership; similarity of implementation alone is insufficient.
@@ -487,51 +419,46 @@ Reusable browser mechanics remain provider-local until at least two independent 
 
 ## 12. Delivery Plan
 
-### Phase A: LecturAL evidence contract
+### Phase A: LecturAL evidence contract (released)
 
-- Publish `lectural --version --json` and `lectural extract ... --json` in a dedicated LecturAL issue and pull request, including source kind, safe artifact paths, bounded failures, extraction status, timestamp integrity, and representative-frame references independent of OCR success.
-- Remove unnecessary local-source path disclosure from portable artifacts, preserve supported YouTube URL compatibility, and make local-only dependency diagnosis agree with its documentation.
-- Tag the reviewed LecturAL release after the evidence contract and portability changes land.
-- Prove at least one end-to-end audiovisual input path against the user's legitimate session. If no LMS retrieval method is available, v0 accepts an explicitly supplied authorized local media file and reports the unavailable provider capability explicitly.
+- Pin LecturAL `v0.3.1`, which publishes evidence contract v2 and the engine-owned skill for extraction, bundle inspection, verification, and notes.
+- Use its published `docs/contracts/cli.md` and JSON Schemas as the source of truth for commands and response shapes.
 
-### Phase B: portable lecture engine
+### Phase B: campusctl first slice
 
-- Complete campusctl portable paths, browser fallback, and unified lock policy.
-- Add the portable provider contract, recommended OS-keyring backend, private one-time setup, and insecure-backend rejection.
-- Extract or reimplement the CNU provider as an internal campusctl module without bundled credentials, personal configuration, scheduled jobs, notifications, submission actions, or Google Tasks.
-- Add the course-source CLI for lecture, assignment, notice, and material discovery; rich assignment and notice source packages; authenticated media retrieval; the selected visible playback queue; authoritative completion checks; and aggregate-safe doctor output.
+- Implement in order: `doctor`, `auth`, `sync --only lectures`, `courses list`, `lectures list`, and `lectures play`, plus campusctl's own thin single-tool intent-to-CLI skill.
+- Use the fresh campusctl repository and its draft contract; keep the repository unreleased until the contract and implementation have a reviewed tag.
+- Keep the first slice limited to the lecture catalog and explicit playback. Assignment, notice, material, and media retrieval follow after v0.
 
-### Phase C: audiovisual evidence bridge
+### Phase C: course-source retrieval and evidence bridge
 
-- Implement `fetch-media` through provider-declared `download` or explicitly confirmed `live-capture`; route authorized local files directly to LecturAL.
-- Integrate fetched or local media with `lectural extract`, require complete primary audiovisual evidence, preserve explicit OCR status, and make retained frame images available for selective vision inspection.
-- Add runtime-owned requirement and verification records, then make the skill map selected course requirements to source evidence, implementation locations, and applicable executable checks.
+- Add assignment, notice, and material discovery and retrieval, then `fetch-media`, through a later campusctl contract.
+- Route authorized local files directly to LecturAL; add fetched media only through a provider-declared, released method.
+- Integrate media with `lectural extract`, require complete primary audiovisual evidence, preserve explicit OCR state, and make retained frames available for selective vision inspection.
+- Implement the `lecture-to-code` multi-engine skill and runtime-owned requirement and verification records after the required engine commands are released.
 - Define cleanup and retention for temporary media.
 
 ### Phase D: plugin
 
-- Complete and forward-test the three drafted skills and implement `lecture-tools-runtime`.
+- Complete and forward-test the single `lecture-to-code` draft and implement `lecture-tools-runtime`; reference the engine-owned skills through bundle release metadata rather than copying them.
 - Add compatibility checks and cross-platform CI.
 - Validate install, update, rollback, uninstall, and fresh-session discovery.
 
 Setup, update, rollback, and uninstall must select concrete tagged versions from the compatibility matrix. Uninstall removes plugin/runtime files but preserves generated work and credentials unless the user separately requests their deletion.
 
-### Phase E: public release
+### Phase E: release
 
-- Complete the campusctl history rewrite and public/private repository split.
-- Run whole-history secret and identifier review.
-- Publish tagged engine releases before the plugin release.
+- Complete required repository and release gates, publish tagged engine releases, and release the plugin only after its dependencies are pinned.
 
 ## 13. Acceptance Criteria
 
 - A new laptop user completes one private setup flow and thereafter uses natural-language requests.
-- Lecture catalog output never mixes in assignments or Google Tasks; `lecture-to-code` may retrieve only explicitly selected assignment, notice, and material sources through their dedicated campusctl commands.
-- A retrieved assignment preserves structured text, embedded images, attachments, deadline metadata, and LMS structural provenance, allowing the skill to present nearby lecture candidates without selecting them automatically.
+- The campusctl engine skill covers direct lecture catalog and selected playback requests; lecture-to-code remains the only multi-engine skill in this package.
+- `lecture-to-code` may retrieve only explicitly selected assignment, notice, and material sources after the later campusctl commands are released.
 - The plugin never receives, prints, stores, or asks the user to paste an LMS credential.
-- A user can synchronize and list incomplete lectures without knowing internal CLI flags.
-- Only explicitly selected lectures play, in the requested order and in a visible official player; the provider's mapped LMS state remains the sole completion authority.
-- A selected lecture can produce authorized audiovisual evidence through `download`, explicitly confirmed `live-capture`, or a user-supplied authorized local file; the result states any incidental LMS progress behavior.
-- If no authorized media retrieval method is available, `lecture-to-code` stops with an actionable remediation rather than degrading to transcript-only code generation.
+- Campusctl plays only explicitly selected lectures in a visible official player and reads completion from authoritative LMS state. It sends no separate progress or attendance recalculation request; if completion is not observed, it reports `unverified`.
+- A selected lecture can produce authorized audiovisual evidence through a later released campusctl retrieval method or a user-supplied authorized local file; unavailable capability is reported rather than replaced with transcript-only code generation.
+- If a primary source cannot yield complete audiovisual evidence, stop and report the missing modality instead of generating from transcript-only input.
 - Before external model use, the user sees the destination and lecture-derived data classes and explicitly confirms the warning; the confirmation is repeated when destination or policy changes.
 - Lecture-to-code output satisfies or explicitly flags every selected requirement, cites relevant source timestamps and evidence types, uses vision for visually dependent claims, and passes applicable local verification steps.
 - Campusctl and LecturAL run from separate locked environments.
