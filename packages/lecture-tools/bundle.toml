@@ -3,13 +3,18 @@ name = "lecture-tools"
 version = "0.1.0"
 status = "experimental"
 
+[runtime]
+name = "lecture-tools-runtime"
+release = "unreleased"
+entrypoint = "runtime/lecture-tools-runtime.py"
+
 [engines.campusctl]
 repository = "https://github.com/haesol-shin/campusctl"
 target_command = "campusctl"
-release = "unreleased"
-source_status = "in-development"
+release = "v0.2.0"
+source_status = "released"
 contract_path = "docs/contracts/cli.md"
-contract_status = "draft"
+contract_status = "published"
 schema_versions = [1]
 skill_path = "skills/campusctl/SKILL.md"
 

@@ -17,7 +17,7 @@ Portable agent skills and plugin bundles for recurring research, project, and st
 Packages own higher-level agent-facing behavior and integration contracts; an engine may also ship at most one thin, single-tool skill that translates user intent to its own stable CLI or contract. Standalone engines remain in their own repositories and expose versioned JSON CLIs.
 Direct lecture catalog and playback requests remain in the campusctl engine-owned skill; they are not duplicated in this bundle.
 
-`lecture-tools` currently documents and validates the intended skill boundary. Do not install it for operational use until `bundle.toml` names tagged engine releases and published contracts.
+`lecture-tools` remains experimental and non-runnable: its multi-engine runtime is not implemented, and campusctl remains in its private repository. Do not install this package for operational use.
 
 ## External repositories
 
