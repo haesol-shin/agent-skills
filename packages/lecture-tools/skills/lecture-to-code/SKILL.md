@@ -1,6 +1,6 @@
 ---
 name: lecture-to-code
-description: Build and verify a code project against explicitly selected assignment requirements using authorized lectures and course context through campusctl and LecturAL evidence. Use for lecture-to-code or course-project requests informed by a selected brief, notice, material, or supporting lecture; never submit work or mutate assignment state.
+description: Build and verify a code project against explicitly selected assignment requirements using user-supplied lecture video with LecturAL evidence and selected official non-video course context through campusctl. Use for lecture-to-code or course-project requests informed by a selected brief, notice, material, or supporting lecture video; never retrieve lecture media from the LMS, submit work, or mutate assignment state.
 ---
 
 # Lecture to Code
