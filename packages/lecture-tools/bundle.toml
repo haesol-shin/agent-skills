@@ -11,7 +11,7 @@ entrypoint = "runtime/lecture-tools-runtime.py"
 [engines.campusctl]
 repository = "https://github.com/haesol-shin/campusctl"
 target_command = "campusctl"
-release = "v0.3.0"
+release = "v0.3.1"
 source_status = "released"
 contract_path = "docs/contracts/cli.md"
 contract_status = "published"
