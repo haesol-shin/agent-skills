@@ -18,7 +18,7 @@ The plugin is an orchestration and instruction layer. It does not absorb the two
 
 - `campusctl` is the public repository for the portable campus-domain CLI, authentication abstraction, and CNU provider. Its v0.3.2 release includes material downloads for content-server attachments and prevents intermittent Panopto SSO popup failures during sync and downloads. It preserves the v0.3.0 command surface and schema version 1. Its own thin single-tool skill handles direct requests. Lectures with `open = false` are rejected before browser work, and play-all requests in the skill target open lectures only, report unopened ones, and ask for one confirmation. Assignment and notice detail text and their attachments remain later scope.
 - `lectural` owns deterministic extraction of time-aligned transcript, frames, OCR annotations, and extraction completeness from supported media. Its own thin skill routes intent to its CLI; neither the engine nor skill decides what a frame means to an assignment or whether a project should be generated.
-- `notice-bot` remains the separate scheduled automation application and will consume campusctl after v0; it does not own the public campus contract.
+- A separate private scheduled automation application may consume campusctl after v0; it does not own the public campus contract.
 
 The engines remain independently versioned processes joined by stable JSON CLI contracts. Engine-owned thin skills remain in their respective repositories and are referenced, not copied.
 
@@ -307,7 +307,7 @@ derive/code:         PENDING | DONE | FAILED
 watch/panopto:       existing LMS completion meaning only
 ```
 
-These JSON files are the v0 state contract; campusctl and lecture-tools do not introduce a database. Each owner writes through a temporary sibling file followed by atomic replacement. Campusctl separately locks its private catalog while the runtime serializes mutations beneath one job root. The runtime owns source retention and cleanup; LecturAL owns only its extraction intermediates. When retained `source.json` refers to deleted temporary media, it records `media_present = false` and the deletion timestamp rather than implying that the path remains usable. `notice-bot` may retain its existing SQLite ledger because scheduled multi-source deduplication is its separate responsibility.
+These JSON files are the v0 state contract; campusctl and lecture-tools do not introduce a database. Each owner writes through a temporary sibling file followed by atomic replacement. Campusctl separately locks its private catalog while the runtime serializes mutations beneath one job root. The runtime owns source retention and cleanup; LecturAL owns only its extraction intermediates. When retained `source.json` refers to deleted temporary media, it records `media_present = false` and the deletion timestamp rather than implying that the path remains usable. A separate scheduled automation application may retain its own ledger because scheduled multi-source deduplication is its separate responsibility.
 
 Each `source.json` contains `source_id`, `kind`, `role`, original entity or user-supplied local file reference, provider-normalized structural context when available, selection timestamp, authorization basis and attestation timestamp when required, retrieval method, source-package or user-supplied video path when any, media presence, policy version, retention rule, and content digest when available. `evidence-set.json` contains the ordered selected source IDs, each source's `requirement`, `primary`, or `supporting` role, source and evidence manifest paths when applicable, relevance rationale, extraction result, and unresolved conflicts. Unknown or duplicate source IDs, missing required manifests, path escape, and conflicting primary evidence fail before derivation.
 
@@ -394,7 +394,7 @@ The intended responsibility split is:
 
 - `agent-skills`: public bundles, canonical skills, compatibility metadata, and profiles;
 - `campusctl`: the public repository for the portable campus-domain CLI, its thin single-tool skill, and CNU provider modules for login, discovery, course structure, lecture playback, assignment and notice metadata, material metadata and selected non-video attachment downloads; assignment and notice detail text and their attachments follow v0.3.2;
-- `notice-bot`: the separate scheduled automation application for notifications, tasks, and boards; it will consume campusctl after v0; and
+- a separate private scheduled automation application for notifications, tasks, and boards, which may consume campusctl after v0; and
 - `lectural`: time-aligned audiovisual evidence extraction, extraction completeness, and study artifacts.
 
 Reusable browser mechanics remain provider-local until at least two independent providers prove a stable shared contract. A shared library is extracted only when it has independent consumers, tests, versioning, and release ownership; similarity of implementation alone is insufficient.
@@ -475,6 +475,6 @@ Setup, update, rollback, and uninstall must select concrete tagged versions from
 ## 14. Design Provenance (Non-normative)
 
 - [gajae-code](https://github.com/Yeachan-Heo/gajae-code): centralized diagnosis, machine-readable status, compatibility, and rollback-oriented distribution.
-- [pi-server](https://github.com/haesol-shin/pi-server): short-lived branches, gated PRs, squash merge, and deployment separated from merge authority.
+- A private deployment repository: short-lived branches, gated PRs, squash merge, and deployment separated from merge authority.
 - [mattpocock/skills](https://github.com/mattpocock/skills): narrow skills, shared setup, and routed references.
 - [paperthin](https://github.com/LilMGenius/paperthin): self-contained skill contracts, single sources of truth, and tag-gated releases.

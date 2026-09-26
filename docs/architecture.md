@@ -18,7 +18,7 @@ Current engines remain independent:
 
 - [`campusctl`](https://github.com/haesol-shin/campusctl) is a fresh repository in development for the portable campus-domain CLI and its thin single-tool skill; its CNU provider remains internal until another institution proves a stable separation boundary.
 - [`lectural`](https://github.com/haesol-shin/lectural) extracts evidence and study artifacts from supported video sources and owns its thin CLI skill.
-- `notice-bot` remains the separate scheduled automation application and will consume campusctl after v0; it does not define the public campus contract.
+- A separate private scheduled automation application may consume campusctl after v0; it does not define the public campus contract.
 
 ## External reference policy
 
