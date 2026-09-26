@@ -6,7 +6,7 @@
 >
 > **Understood as:** define a portable, versioned multi-engine workflow that turns explicitly selected course sources into a verified project satisfying selected assignment requirements. Lecture video is processed as time-aligned multimodal evidence; selected course documents add requirements and context. Direct lecture discovery and playback belong to campusctl's separate engine-owned skill; submission, grading-state mutation, Google Tasks, digests, scheduled playback, and unattended campus automation remain excluded.
 
-The checked-in `0.1.0` manifest is a design version, not a published or operational release. campusctl is pinned to tagged release v0.3.0 (published contract, schema version 1). `lecture-tools` remains experimental and non-runnable because its multi-engine runtime is not implemented.
+The checked-in `0.1.0` manifest is a design version, not a published or operational release. campusctl is pinned to tagged release v0.3.1 (published contract, schema version 1). `lecture-tools` remains experimental and non-runnable because its multi-engine runtime is not implemented.
 
 ## 1. Purpose
 
@@ -16,7 +16,7 @@ The checked-in `0.1.0` manifest is a design version, not a published or operatio
 
 The plugin is an orchestration and instruction layer. It does not absorb the two engines:
 
-- `campusctl` is a private repository for the portable campus-domain CLI, authentication abstraction, and CNU provider. Its v0.3.0 release provides `config init`, `doctor`, `setup`, `auth`, sync and local listing for lectures, assignments, notices, and materials, explicit visible lecture playback, and download of one user-selected official non-video material attachment. Its own thin single-tool skill handles direct requests. Lectures with `open = false` are rejected before browser work, and play-all requests in the skill target open lectures only, report unopened ones, and ask for one confirmation. Assignment and notice detail text and their attachments remain later scope.
+- `campusctl` is a private repository for the portable campus-domain CLI, authentication abstraction, and CNU provider. Its v0.3.1 patch release fixes material downloads for content-server attachments and prevents intermittent Panopto SSO popup failures during sync and downloads. It preserves the v0.3.0 command surface and schema version 1. Its own thin single-tool skill handles direct requests. Lectures with `open = false` are rejected before browser work, and play-all requests in the skill target open lectures only, report unopened ones, and ask for one confirmation. Assignment and notice detail text and their attachments remain later scope.
 - `lectural` owns deterministic extraction of time-aligned transcript, frames, OCR annotations, and extraction completeness from supported media. Its own thin skill routes intent to its CLI; neither the engine nor skill decides what a frame means to an assignment or whether a project should be generated.
 - `notice-bot` remains the separate scheduled automation application and will consume campusctl after v0; it does not own the public campus contract.
 
@@ -109,7 +109,7 @@ Engine-owned skills are standalone thin entrypoints. They are not children of th
 
 The product uses three durable abstractions:
 
-- A **source record** identifies one user-selected lecture, assignment brief, notice, or material and records its provenance, LMS structural context, authorization basis, role, and retention rule. Campusctl v0.3.0 supplies metadata catalogs, lecture playback, and one-at-a-time downloads of explicitly selected official non-video material attachments; assignment and notice detail text and their attachments require later released retrieval commands. The runtime owns the job-local record.
+- A **source record** identifies one user-selected lecture, assignment brief, notice, or material and records its provenance, LMS structural context, authorization basis, role, and retention rule. Campusctl v0.3.1 supplies metadata catalogs, lecture playback, and one-at-a-time downloads of explicitly selected official non-video material attachments, including content-server attachments; assignment and notice detail text and their attachments require later released retrieval commands. The runtime owns the job-local record.
 - An **evidence bundle** is LecturAL's time-aligned, machine-readable transformation of one lecture medium. It references transcript segments, representative frame images, OCR annotations, timestamps, and extraction-completeness results without interpreting their assignment meaning.
 - A **verified deliverable** is the generated project plus a requirement checklist that maps each selected requirement to implementation evidence, course-source evidence, and executable verification where applicable.
 
@@ -127,7 +127,7 @@ Every selected source has one job-local role:
 
 The skill presents candidates and resolves ambiguity with the user before retrieval. The runtime records only the resulting explicit selection and rejects a job with no `requirement` source or no audiovisual `primary` source. A direct user request may itself be the requirement source.
 
-`campusctl` v0.3.0 provides configuration initialization (`config init`), browser setup (`setup`), diagnosis (including advertised capabilities), authentication, synchronization and listing for lectures, assignments, notices, and materials, explicit visible playback, and download of one user-selected official non-video material attachment. It rejects lectures with `open = false` before browser work using `lecture-not-open` (`user-action`, exit 2). The local persistent browser profile is the default, with optional attachment to an existing CDP endpoint; no resident service is required. Assignment and notice detail text and their attachments remain later scope; lists provide metadata only. The plugin runtime is not implemented and cannot retrieve these sources yet.
+`campusctl` v0.3.1 provides configuration initialization (`config init`), browser setup (`setup`), diagnosis (including advertised capabilities), authentication, synchronization and listing for lectures, assignments, notices, and materials, explicit visible playback, and download of one user-selected official non-video material attachment, including content-server attachments. The patch release prevents intermittent Panopto SSO popup failures during synchronization and downloads. It preserves schema version 1 and the existing command contract. It rejects lectures with `open = false` before browser work using `lecture-not-open` (`user-action`, exit 2). The local persistent browser profile is the default, with optional attachment to an existing CDP endpoint; no resident service is required. Assignment and notice detail text and their attachments remain later scope; lists provide metadata only. The plugin runtime is not implemented and cannot retrieve these sources…
 
 ### 4.1 Dependency isolation
 
@@ -268,7 +268,7 @@ Every job command follows the common response envelope and exit codes. Mutating 
 
 ## 6. Lecture-to-Code Workflow
 
-The lecture-to-code workflow remains unavailable in this package until its multi-engine runtime is implemented. Campusctl v0.3.0 supplies lecture playback and metadata catalogs for assignments, notices, and materials, plus explicitly selected official non-video material downloads; assignment and notice detail text and their attachments remain later scope.
+The lecture-to-code workflow remains unavailable in this package until its multi-engine runtime is implemented. Campusctl v0.3.1 supplies lecture playback and metadata catalogs for assignments, notices, and materials, plus explicitly selected official non-video material downloads, including content-server attachments; its patch fixes intermittent Panopto SSO popup failures during sync and downloads. Assignment and notice detail text and their attachments remain later scope.
 
 1. Resolve the assignment or requested outcome from the user's request, one or more video files supplied directly by the user, and explicitly selected assignment briefs, notices, and official non-video attachments. Use campusctl's LMS structural context to surface nearby items without treating proximity as semantic proof. Show candidates and relevance before retrieval; only explicitly selected items enter the job.
 2. Before a hosted agent or any external LLM receives new lecture-derived metadata, transcript, OCR, frames, or other evidence, the skill shows a concise disclosure identifying the destination, data classes, purpose, retention facts known to the plugin, and the provider's policy warning. The runtime records and validates the user's explicit confirmation before returning that payload. Cache only the confirmation record and policy version, never the lecture data or credentials. Repeat the disclosure when the provider policy, external destination, or newly requested data class changes.
@@ -331,7 +331,7 @@ lecture-tools/
   bundle.toml
 ```
 
-The campusctl skill at `skills/campusctl/SKILL.md` is pinned through bundle metadata to tagged release `v0.3.0` in the private campusctl repository. LecturAL's engine-owned skill is pinned at [`v0.3.1/skills/lectural/SKILL.md`](https://github.com/haesol-shin/lectural/blob/v0.3.1/skills/lectural/SKILL.md). `bundle.toml` records both paths and release states.
+The campusctl skill at `skills/campusctl/SKILL.md` is pinned through bundle metadata to tagged release `v0.3.1` in the private campusctl repository. LecturAL's engine-owned skill is pinned at [`v0.3.1/skills/lectural/SKILL.md`](https://github.com/haesol-shin/lectural/blob/v0.3.1/skills/lectural/SKILL.md). `bundle.toml` records both paths and release states.
 
 The plugin is the install/update/remove unit; a skill is one bounded behavior. `skills/` is the canonical source. Native metadata may live beside a skill, such as `agents/openai.yaml`; generated or larger harness adapters belong under `adapters/` when introduced. Codex is the first supported adapter; other harnesses are not claimed until their adapters pass the same contract tests. The single `lecture-to-code` skill owns the expensive, artifact-producing multi-engine workflow; direct campus requests remain in the campusctl skill. A separate study skill is not part of v0 because LecturAL already owns evidence extraction and notes.
 
@@ -358,7 +358,7 @@ External model processing is a separate disclosure boundary from credentials. Th
 
 ## 9. Versioning and Compatibility
 
-No released plugin may depend on a mutable branch. LecturAL is pinned to tagged release `v0.3.1`, whose published CLI and evidence contract are at `docs/contracts/cli.md` (contract version 2, JSON Schema version 2). Campusctl is pinned to tagged release `v0.3.0` and its published CLI contract (JSON Schema version 1). `lecture-tools` remains experimental and non-runnable; a tagged engine release does not replace the package's own runtime and release gates.
+No released plugin may depend on a mutable branch. LecturAL is pinned to tagged release `v0.3.1`, whose published CLI and evidence contract are at `docs/contracts/cli.md` (contract version 2, JSON Schema version 2). Campusctl is pinned to tagged release `v0.3.1` and its published CLI contract (JSON Schema version 1). `lecture-tools` remains experimental and non-runnable; a tagged engine release does not replace the package's own runtime and release gates.
 
 `bundle.toml` records `runtime.release` and `runtime.entrypoint` separately from engine releases, contract paths and status, skill paths, and supported schema versions. The lecture-to-code skill may run only when the runtime is pinned to a released tag and present in the installed bundle. The current runtime release is `unreleased`, so the package remains non-runnable.
 
@@ -393,7 +393,7 @@ Before a public release, each repository must meet its license, contribution, se
 The intended responsibility split is:
 
 - `agent-skills`: public bundles, canonical skills, compatibility metadata, and profiles;
-- `campusctl`: a private and personal-first repository for the portable campus-domain CLI, its thin single-tool skill, and CNU provider modules for login, discovery, course structure, lecture playback, assignment and notice metadata, material metadata and selected non-video attachment downloads; assignment and notice detail text and their attachments follow v0.3.0;
+- `campusctl`: a private and personal-first repository for the portable campus-domain CLI, its thin single-tool skill, and CNU provider modules for login, discovery, course structure, lecture playback, assignment and notice metadata, material metadata and selected non-video attachment downloads; assignment and notice detail text and their attachments follow v0.3.1;
 - `notice-bot`: the separate scheduled automation application for notifications, tasks, and boards; it will consume campusctl after v0; and
 - `lectural`: time-aligned audiovisual evidence extraction, extraction completeness, and study artifacts.
 
@@ -434,7 +434,7 @@ Reusable browser mechanics remain provider-local until at least two independent 
 
 - The v0.2.0 release provides `config init`, `doctor`, `setup`, `auth`, `sync --only lectures`, `courses list`, `lectures list`, and `lectures play`, plus campusctl's own thin single-tool intent-to-CLI skill.
 - The v0.2.1 release preserves schema version 1, rejects lectures with `open = false` before browser work using `lecture-not-open` (`user-action`, exit 2), and updates the skill's play-all behavior to target open lectures only, report unopened ones, and ask one confirmation.
-- The v0.3.0 release preserves schema version 1 and adds separate assignment, notice, and material metadata catalogs, a one-user-selection-at-a-time official non-video material download, and doctor capability reporting. Assignment and notice detail text and attachments remain later scope.
+- The v0.3.1 patch release preserves schema version 1 and the command surface while fixing content-server material downloads and intermittent Panopto SSO popup failures during sync and downloads. Assignment and notice detail text and attachments remain later scope.
 
 ### Phase C: course-source retrieval and evidence bridge
 
@@ -460,7 +460,7 @@ Setup, update, rollback, and uninstall must select concrete tagged versions from
 
 - A new laptop user completes one private setup flow and thereafter uses natural-language requests.
 - The campusctl engine skill covers direct lecture, assignment, notice, and material catalog requests, selected lecture playback, and one explicitly selected official non-video material download at a time; lecture-to-code remains the only multi-engine skill in this package.
-- For LMS attachments, `lecture-to-code` may use only explicitly selected official non-video material attachments from v0.3.0 once its runtime is released; assignment and notice detail text and attachments require later released campusctl commands.
+- For LMS attachments, `lecture-to-code` may use only explicitly selected official non-video material attachments from v0.3.1 once its runtime is released; assignment and notice detail text and attachments require later released campusctl commands.
 - The plugin never receives, prints, stores, or asks the user to paste an LMS credential.
 - Campusctl plays only explicitly selected lectures through the visible official player and reads completion from authoritative LMS state: `completed` requires state `F`, and `recorded` requires non-`F`, `attendance_counted: false`, and full displayed watch duration; otherwise it reports `unverified`. Attempts to play lectures with `open = false` are rejected before browser work with `lecture-not-open` (`user-action`, exit 2). For play-all requests, the campusctl skill targets open lectures only, reports unopened ones, and asks for one confirmation. `recorded` is not attendance credit. The command sends no separate progress or attendance recalculation request.
 - A user-supplied video file can produce authorized audiovisual evidence; no other video source is allowed.
