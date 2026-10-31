@@ -211,16 +211,15 @@ When the executor, reviewer, and maintainer share one GitHub identity, GitHub ca
 - Valid branch and commit types are `feat`, `fix`, `docs`, `refactor`, `test`, `perf`, `ci`, `build`, `chore`, and `revert`.
 - Commit subjects and pull request titles use `type(scope): imperative summary`, for example `feat(lectural): accept local media evidence`.
 - Stage exact paths, review the staged diff, and never mix unrelated user changes into the branch.
-- At merge time, the maintainer uses squash merge and supplies the final subject and body explicitly instead of accepting GitHub's generated commit list. The subject is the final pull request title plus `(#<number>)`. The body contains one to four bullets, each limited to one material delivered outcome, behavior or contract change, or compatibility constraint. It never copies template headings or instructions, detailed implementation, intermediate commit subjects, review chronology, temporary fixes, verification results, performance measurements, rollback procedure, or file inventories from their canonical Issue, pull request, plan, changelog, or documentation surfaces. When a change removes or incompatibly alters a public contract, a `BREAKING CHANGE: <description>` footer is required after the bullets; otherwise the footer is omitted. Until automated enforcement exists, the maintainer checks this gate in the merge dialog. Merge commits are disabled so noisy intermediate history does not enter `main`.
+- At merge time, the maintainer uses squash merge and supplies the final subject and body explicitly instead of accepting GitHub's generated commit list. The subject is the final pull request title plus `(#<number>)`. The body is imperative `-` bullets with no fixed count, each one line of 72 characters or fewer. It gives the reason for the change, because the diff already shows what changed; it names a rejected alternative only when another approach looks more natural, and it skips bullets that repeat the subject or the diff. It never copies template headings or instructions, detailed implementation, intermediate commit subjects, review chronology, temporary fixes, verification results, performance measurements, rollback procedure, or file inventories from their canonical Issue, pull request, plan, changelog, or documentation surfaces. When a change removes or incompatibly alters a public contract, a `BREAKING CHANGE: <description>` footer is required after the bullets; otherwise the footer is omitted. Until automated enforcement exists, the maintainer checks this gate in the merge dialog. Merge commits are disabled so noisy intermediate history does not enter `main`.
 - Delete the source branch and worktree after merge; stale merged branches are operational drift and should be detected periodically.
 - Direct pushes, force pushes, deletion, and history rewriting of protected branches and release tags are prohibited.
 
 ```text
 type(scope): imperative summary (#<pull-request>)
 
-- <Material delivered outcome.>
-- <Important behavior or contract change.>
-- <Compatibility constraint, when applicable.>
+- <Reason for the change, which the diff cannot show>
+- <Rejected alternative, only when another approach looks more natural>
 
 BREAKING CHANGE: <description, only when applicable>
 ```
