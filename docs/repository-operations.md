@@ -102,8 +102,7 @@ Risk: <low|medium|high>
 Intent digest: sha256:<digest>
 ```
 
-Canonical digest construction is part of the central contract and its conformance fixtures. Structured payloads are parsed into schema-defined fields, text fields normalize CRLF and CR to LF with one terminal newline, and the result is hashed as UTF-8 [JSON Canonicalization Scheme](https://www.rfc-editor.org/rfc/rfc8785) bytes. The diff digest hashes the raw output of `git -c core.quotePath=true diff --binary --full-index --no-color --no-ext-diff --no-textconv --no-renames <base>...<head> --`. A permitted direct low-risk pull request without an accepted-intent comment uses the literal `intent:none`; its authorization scope and rationale remain in the pull request body.
-Each machine-readable record occupies one standalone line, uses the fields in the shown order with one ASCII space between fields, and permits human-readable Markdown only on other lines of the same comment.
+Canonical digest construction is part of the central contract and its conformance fixtures. Structured payloads are parsed into schema-defined fields, text fields normalize CRLF and CR to LF with one terminal newline, and the result is hashed as UTF-8 [JSON Canonicalization Scheme](https://www.rfc-editor.org/rfc/rfc8785) bytes. The diff digest hashes the raw output of `git -c core.quotePath=true diff --binary --full-index --no-color --no-ext-diff --no-textconv --no-renames <base>...<head> --`. A permitted direct low-risk pull request without an accepted-intent comment uses the literal `intent:none`; its authorization scope and rationale remain in the pull request body. Each machine-readable record occupies one standalone line, uses the fields in the shown order with one ASCII space between fields, and permits human-readable Markdown only on other lines of the same comment.
 
 Low-risk work defaults to the direct route when its accepted scope is clear and can be implemented as one reviewable change. Medium- and high-risk work use the planned route. Risk is justified in the accepted-intent comment or, for a direct pull request, in the pull request body. An agent may raise risk when new evidence appears; lowering risk requires maintainer approval. Work that cannot remain one coherent, independently verifiable pull request is split before execution.
 
@@ -165,12 +164,12 @@ The problem and impact, why the work was needed, and the delivered outcome. This
 
 ## Verification
 
-- `<behavior>` — `<command or evidence>` — `<result>`
+- `<behavior>`: `<command or evidence>`; `<result>`
 - Unverified: none | <gap and reason>
 
 ## Risk and rollback
 
-Risk: <low|medium|high> — <rationale>
+Risk: <low|medium|high> (<rationale>)
 
 Rollback: <exact reversal or mitigation>
 

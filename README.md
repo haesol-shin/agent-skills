@@ -14,8 +14,7 @@ Portable agent skills and plugin bundles for recurring research, project, and st
 | --- | --- | --- |
 | `lecture-tools` | Experimental, not runnable | Build a verified project from authorized course evidence and selected requirements. |
 
-Packages own higher-level agent-facing behavior and integration contracts; an engine may also ship at most one thin, single-tool skill that translates user intent to its own stable CLI or contract. Standalone engines remain in their own repositories and expose versioned JSON CLIs.
-Direct lecture catalog and playback requests remain in the campusctl engine-owned skill; they are not duplicated in this bundle.
+Packages own higher-level agent-facing behavior and integration contracts; an engine may also ship at most one thin, single-tool skill that translates user intent to its own stable CLI or contract. Standalone engines remain in their own repositories and expose versioned JSON CLIs. Direct lecture catalog and playback requests remain in the campusctl engine-owned skill; they are not duplicated in this bundle.
 
 `lecture-tools` remains experimental and non-runnable: its multi-engine runtime is not implemented. Do not install this package for operational use.
 
