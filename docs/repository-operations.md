@@ -164,12 +164,12 @@ The problem and impact, why the work was needed, and the delivered outcome. This
 
 ## Verification
 
-- `<behavior>` — `<command or evidence>` — `<result>`
+- `<behavior>`: `<command or evidence>`; `<result>`
 - Unverified: none | <gap and reason>
 
 ## Risk and rollback
 
-Risk: <low|medium|high> — <rationale>
+Risk: <low|medium|high> (<rationale>)
 
 Rollback: <exact reversal or mitigation>
 
