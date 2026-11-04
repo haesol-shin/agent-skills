@@ -4,3 +4,8 @@ schema_version = 1
 name = "lecture-tools"
 path = "packages/lecture-tools"
 status = "experimental"
+
+[[packages]]
+name = "writing-tools"
+path = "packages/writing-tools"
+status = "experimental"
