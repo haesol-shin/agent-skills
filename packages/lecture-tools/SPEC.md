@@ -417,7 +417,7 @@ Reusable browser mechanics remain provider-local until at least two independent 
 - campusctl tests use mocked browser/keyring/network and an isolated temporary JSON state directory.
 - LecturAL tests use local fixtures and keep smoke/network/model tests opt-in.
 - Media-method authorization, path containment, atomic JSON replacement, locking, cleanup, partial files, and interrupted-run behavior are tested.
-- Playback tests cover explicit finite queues, visible serial execution, authoritative status mapping, pause on unresolved completion, bounded preview reopening, and absence of playback replay.
+- Playback tests cover explicit finite queues, visible serial execution, authoritative status mapping, continuation after item failures or unverified results, bounded preview reopening, and absence of playback replay.
 - Lecture-to-code tests require complete primary audiovisual evidence, relevant-frame vision inspection, requirement provenance, external-model disclosure, and requirement-by-requirement project verification, not exact prose or exact model output. Fixed requirement fixtures are authored independently of the runtime output so a generated checklist cannot validate itself.
 
 ### 11.3 Platform CI
@@ -442,11 +442,11 @@ Reusable browser mechanics remain provider-local until at least two independent 
 - The v0.4.0 release preserves schema version 1 and adds selected assignment and notice detail fetch into local source packages, recording notice attachments as omissions. It also provides guided setup, cached status, course selection, selected-file downloads, supported headless operations, sync profiling, and explicit confirmed replay.
 - The v0.5.0 release preserves JSON schema version 1, adds multi-ID assignment and notice fetch and local headless fetch, and supports configurable material download placement with opt-in adoption of an identical file (unavailable on Windows). It improves page readiness, archive attachment identity, and reachable to-do coverage, and publishes schema-2 sync profiling.
 - The v0.5.1 release preserves JSON schema version 1 and downloads selected archive attachments stored in the LMS, including PDFs served with the standard PDF media type.
-- The 0.6.0 release preserves JSON schema version 1 and the command surface, adds Korean user guides and a usage guide, groups CLI help by task, and starts first-run status with the next sync step.
-- The 0.6.1 release preserves JSON schema version 1, adds an agent onboarding guide, and reports structured play failure diagnostics and coverage-based replay completion.
-- The 0.6.2 release preserves CLI envelope schema version 1, fetches unsubmitted assignments with empty submission records, and classifies player frame failures with fixed-token `frame_kind` in play diagnostic schema version 2.
-- The 0.6.3 release preserves CLI envelope schema version 1 and play diagnostic schema version 2, and stops orphaned browser response tasks from printing target-closed exceptions to stderr after commands finish.
-- The 0.6.4 release, on Linux, makes downloaded materials trigger a close-write event so inotify-based sync clients upload them.
+- The v0.6.0 release preserves JSON schema version 1 and the command surface, adds Korean user guides and a usage guide, groups CLI help by task, and starts first-run status with the next sync step.
+- The v0.6.1 release preserves JSON schema version 1, adds an agent onboarding guide, and reports structured play failure diagnostics and coverage-based replay completion.
+- The v0.6.2 release preserves CLI envelope schema version 1, fetches unsubmitted assignments with empty submission records, and classifies player frame failures with fixed-token `frame_kind` in play diagnostic schema version 2.
+- The v0.6.3 release preserves CLI envelope schema version 1 and play diagnostic schema version 2, and stops orphaned browser response tasks from printing target-closed exceptions to stderr after commands finish.
+- The v0.6.4 release, on Linux, makes downloaded materials trigger a close-write event so inotify-based sync clients upload them.
 - The v0.7.0 release preserves CLI envelope schema version 1, reopens a lecture preview observed never to have started (at most three attempts), continues the playback queue after item failures and stops only for session failures, adds `attempts` to result items, starts cued YouTube lectures with one bounded click, stops playback when a progress callback is cancelled, and publishes play diagnostic schema version 3.
 
 ### Phase C: course-source retrieval and evidence bridge
