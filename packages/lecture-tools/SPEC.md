@@ -6,7 +6,7 @@
 >
 > **Understood as:** define a portable, versioned multi-engine workflow that turns explicitly selected course sources into a verified project satisfying selected assignment requirements. Lecture video is processed as time-aligned multimodal evidence; selected course documents add requirements and context. Direct lecture discovery and playback belong to campusctl's separate engine-owned skill; submission, grading-state mutation, Google Tasks, digests, scheduled playback, and unattended campus automation remain excluded.
 
-The checked-in `0.1.0` manifest is a design version, not a published or operational release. campusctl is pinned to tagged release v0.6.3 (published contract, schema version 1). `lecture-tools` remains experimental and non-runnable because its multi-engine runtime is not implemented.
+The checked-in `0.1.0` manifest is a design version, not a published or operational release. campusctl is pinned to tagged release v0.7.0 (published contract, schema version 1). `lecture-tools` remains experimental and non-runnable because its multi-engine runtime is not implemented.
 
 ## 1. Purpose
 
@@ -16,7 +16,7 @@ The checked-in `0.1.0` manifest is a design version, not a published or operatio
 
 The plugin is an orchestration and instruction layer. It does not absorb the two engines:
 
-- `campusctl` is the public repository for the portable campus-domain CLI, authentication abstraction, and CNU provider. Its v0.6.3 release supports fetching multiple explicitly selected assignment or notice details in one session, including local headless fetch, configurable material download placement with optional adoption of an identical existing file (adoption fails safely on Windows), and downloads of LMS-stored archive attachments. It ships English and Korean user guides and task-grouped CLI help, and preserves JSON schema version 1. Its own thin single-tool skill handles direct requests.
+- `campusctl` is the public repository for the portable campus-domain CLI, authentication abstraction, and CNU provider. Its v0.7.0 release supports fetching multiple explicitly selected assignment or notice details in one session, including local headless fetch, configurable material download placement with optional adoption of an identical existing file (adoption fails safely on Windows), and downloads of LMS-stored archive attachments. It ships English and Korean user guides and task-grouped CLI help, and preserves JSON schema version 1. Its own thin single-tool skill handles direct requests.
 - `lectural` owns deterministic extraction of time-aligned transcript, frames, OCR annotations, and extraction completeness from supported media. Its own thin skill routes intent to its CLI; neither the engine nor skill decides what a frame means to an assignment or whether a project should be generated.
 - A separate private scheduled automation application may consume campusctl after v0; it does not own the public campus contract.
 
@@ -109,7 +109,7 @@ Engine-owned skills are standalone thin entrypoints. They are not children of th
 
 The product uses three durable abstractions:
 
-- A **source record** identifies one user-selected lecture, assignment brief, notice, or material and records its provenance, LMS structural context, authorization basis, role, and retention rule. Campusctl v0.6.3 supplies metadata catalogs, lecture playback, single- or multi-ID assignment and notice detail source packages, and one-at-a-time downloads of explicitly selected official non-video material attachments. Notice attachments are omitted from fetched packages. The runtime owns the job-local record.
+- A **source record** identifies one user-selected lecture, assignment brief, notice, or material and records its provenance, LMS structural context, authorization basis, role, and retention rule. Campusctl v0.7.0 supplies metadata catalogs, lecture playback, single- or multi-ID assignment and notice detail source packages, and one-at-a-time downloads of explicitly selected official non-video material attachments. Notice attachments are omitted from fetched packages. The runtime owns the job-local record.
 - An **evidence bundle** is LecturAL's time-aligned, machine-readable transformation of one lecture medium. It references transcript segments, representative frame images, OCR annotations, timestamps, and extraction-completeness results without interpreting their assignment meaning.
 - A **verified deliverable** is the generated project plus a requirement checklist that maps each selected requirement to implementation evidence, course-source evidence, and executable verification where applicable.
 
@@ -127,7 +127,7 @@ Every selected source has one job-local role:
 
 The skill presents candidates and resolves ambiguity with the user before retrieval. The runtime records only the resulting explicit selection and rejects a job with no `requirement` source or no audiovisual `primary` source. A direct user request may itself be the requirement source.
 
-`campusctl` v0.6.3 provides guided setup, configuration and authentication, diagnosis, cached status and lecture health, synchronization of all four metadata domains in one browser session, listing, explicit visible playback and confirmed replay, single- or multi-ID assignment and notice detail fetch into local source packages, and selected official non-video material downloads. Fetch works with local headless Chromium; playback still requires a headed browser. Material downloads support a configurable per-course layout and optional byte-identical file adoption, which fails safely on Windows. Sync and fetch wait for the selected content and course identity; sync reads reachable to-do rows, verifies archive attachments against their posts, and retains stale rows when an empty result cannot be established. Notice attachments are recorded as omissions rather than transferred. It preserves JSON schema version 1. The local persistent browser profile is the default, with optional attachment to an existing CDP endpoint; no resident service is required. The plugin runtime is not implemented and cannot yet orchestrate these sources.
+`campusctl` v0.7.0 provides guided setup, configuration and authentication, diagnosis, cached status and lecture health, synchronization of all four metadata domains in one browser session, listing, explicit visible playback and confirmed replay, single- or multi-ID assignment and notice detail fetch into local source packages, and selected official non-video material downloads. Fetch works with local headless Chromium; playback still requires a headed browser. Material downloads support a configurable per-course layout and optional byte-identical file adoption, which fails safely on Windows. Sync and fetch wait for the selected content and course identity; sync reads reachable to-do rows, verifies archive attachments against their posts, and retains stale rows when an empty result cannot be established. Notice attachments are recorded as omissions rather than transferred. It preserves JSON schema version 1. The local persistent browser profile is the default, with optional attachment to an existing CDP endpoint; no resident service is required. The plugin runtime is not implemented and cannot yet orchestrate these sources.
 
 ### 4.1 Dependency isolation
 
@@ -153,7 +153,7 @@ In auto mode, the direct CLI defaults to human output on a TTY and JSON otherwis
 {
   "schema_version": 1,
   "tool": "campusctl",
-  "tool_version": "0.6.3",
+  "tool_version": "0.7.0",
   "status": "ok",
   "result": {},
   "errors": [],
@@ -208,7 +208,7 @@ campusctl materials download [<entity-id>|<number>] [--out <directory>] [--json]
 
 Bare `sync` refreshes all four metadata domains together; `--only` narrows the domains. Per-course or per-domain failures retain stale rows without publishing them as fresh, including when an empty result cannot be verified. Sync reads reachable to-do rows even without pagination controls and verifies archive attachments against the selected post. Lists use cached catalogs unless `--refresh` is requested; lecture lists are incomplete by default, with `--all` including completed and `recorded` rows. Assignment and notice lists expose metadata, not detail text; one or more explicitly selected full IDs are fetched separately. Unmatched notices have unknown read state, and a paginated notice board leaves its previous rows stale. `doctor --json` advertises sync for all four domains, list and play for lectures, list and fetch for assignments and notices, list and download for materials, and local status. The campusctl skill translates direct user intent to this single CLI without semantic interpretation and always passes `--json`.
 
-Lectures with `open = false` are rejected before any browser work with `lecture-not-open` (`user-action`, exit 2). Playback validates explicitly selected IDs before opening a visible official player, then plays serially and closes it through its normal UI. A row already in LMS state `F` is `already-complete`; after playback, state `F` is `completed`. Otherwise, full displayed watch time with `attendance_counted: false` sets catalog completion and playback outcome to `recorded`, which does not mean attendance was credited; unresolved completion is `unverified`. Completed or recorded lectures require explicit `--replay` and confirmation in interactive mode. The result records `replay_requested` and `player_opened`; the command never seeks, fakes progress, or retries playback automatically.
+Lectures with `open = false` are rejected before any browser work with `lecture-not-open` (`user-action`, exit 2). Playback validates explicitly selected IDs before opening a visible official player, then plays serially and closes it through its normal UI. A row already in LMS state `F` is `already-complete`; after playback, state `F` is `completed`. Otherwise, full displayed watch time with `attendance_counted: false` sets catalog completion and playback outcome to `recorded`, which does not mean attendance was credited; unresolved completion is `unverified`. Completed or recorded lectures require explicit `--replay` and confirmation in interactive mode. The result records `replay_requested` and `player_opened`; the command never seeks, fakes progress, or replays observed playback. It reopens a preview observed never to have started, at most three attempts per lecture, and each result item reports `attempts`. It continues the queue after item failures or unverified results and stops only for session failures.
 
 In `--json` mode, commands emit the common JSON envelope to stdout, keep diagnostics on stderr, and use the documented exit codes. Unknown schema versions fail closed. The browser session uses a local persistent profile by default and may attach to an existing CDP endpoint; no resident browser service is required. Global `--headless` and `--headed` override the configured browser mode for supported operations; local Chromium supports headless fetch, while playback and CDP attachment require headed mode. `--profile` writes schema-2 sync profiling with wait, page, and document timings and sanitized failed readiness and identity checks to stderr.
 
@@ -272,7 +272,7 @@ Every job command follows the common response envelope and exit codes. Mutating 
 
 ## 6. Lecture-to-Code Workflow
 
-The lecture-to-code workflow remains unavailable in this package until its multi-engine runtime is implemented. Campusctl v0.6.3 supplies lecture playback, metadata catalogs for assignments, notices, and materials, single- or multi-ID assignment and notice detail source packages (including local headless fetch), and selected official non-video material downloads with configurable placement and optional identical-file adoption. Notice attachments are recorded as omissions rather than transferred.
+The lecture-to-code workflow remains unavailable in this package until its multi-engine runtime is implemented. Campusctl v0.7.0 supplies lecture playback, metadata catalogs for assignments, notices, and materials, single- or multi-ID assignment and notice detail source packages (including local headless fetch), and selected official non-video material downloads with configurable placement and optional identical-file adoption. Notice attachments are recorded as omissions rather than transferred.
 
 1. Resolve the assignment or requested outcome from the user's request, one or more video files supplied directly by the user, and explicitly selected assignment briefs, notices, and official non-video attachments. Use campusctl's LMS structural context to surface nearby items without treating proximity as semantic proof. Show candidates and relevance before retrieval; only explicitly selected items enter the job.
 2. Before a hosted agent or any external LLM receives new lecture-derived metadata, transcript, OCR, frames, or other evidence, the skill shows a concise disclosure identifying the destination, data classes, purpose, retention facts known to the plugin, and the provider's policy warning. The runtime records and validates the user's explicit confirmation before returning that payload. Cache only the confirmation record and policy version, never the lecture data or credentials. Repeat the disclosure when the provider policy, external destination, or newly requested data class changes.
@@ -335,7 +335,7 @@ lecture-tools/
   bundle.toml
 ```
 
-The campusctl skill at `skills/campusctl/SKILL.md` is pinned through bundle metadata to tagged release `v0.6.3` in the public campusctl repository. LecturAL's engine-owned skill is pinned at [`v0.3.1/skills/lectural/SKILL.md`](https://github.com/haesol-shin/lectural/blob/v0.3.1/skills/lectural/SKILL.md). `bundle.toml` records both paths and release states.
+The campusctl skill at `skills/campusctl/SKILL.md` is pinned through bundle metadata to tagged release `v0.7.0` in the public campusctl repository. LecturAL's engine-owned skill is pinned at [`v0.3.1/skills/lectural/SKILL.md`](https://github.com/haesol-shin/lectural/blob/v0.3.1/skills/lectural/SKILL.md). `bundle.toml` records both paths and release states.
 
 The plugin is the install/update/remove unit; a skill is one bounded behavior. `skills/` is the canonical source. Native metadata may live beside a skill, such as `agents/openai.yaml`; generated or larger harness adapters belong under `adapters/` when introduced. Codex is the first supported adapter; other harnesses are not claimed until their adapters pass the same contract tests. The single `lecture-to-code` skill owns the expensive, artifact-producing multi-engine workflow; direct campus requests remain in the campusctl skill. A separate study skill is not part of v0 because LecturAL already owns evidence extraction and notes.
 
@@ -362,7 +362,7 @@ External model processing is a separate disclosure boundary from credentials. Th
 
 ## 9. Versioning and Compatibility
 
-No released plugin may depend on a mutable branch. LecturAL is pinned to tagged release `v0.3.1`, whose published CLI and evidence contract are at `docs/contracts/cli.md` (contract version 2, JSON Schema version 2). Campusctl is pinned to tagged release `v0.6.3` and its published CLI contract (JSON Schema version 1). `lecture-tools` remains experimental and non-runnable; a tagged engine release does not replace the package's own runtime and release gates.
+No released plugin may depend on a mutable branch. LecturAL is pinned to tagged release `v0.3.1`, whose published CLI and evidence contract are at `docs/contracts/cli.md` (contract version 2, JSON Schema version 2). Campusctl is pinned to tagged release `v0.7.0` and its published CLI contract (JSON Schema version 1). `lecture-tools` remains experimental and non-runnable; a tagged engine release does not replace the package's own runtime and release gates.
 
 `bundle.toml` records `runtime.release` and `runtime.entrypoint` separately from engine releases, contract paths and status, skill paths, and supported schema versions. The lecture-to-code skill may run only when the runtime is pinned to a released tag and present in the installed bundle. The current runtime release is `unreleased`, so the package remains non-runnable.
 
@@ -417,7 +417,7 @@ Reusable browser mechanics remain provider-local until at least two independent 
 - campusctl tests use mocked browser/keyring/network and an isolated temporary JSON state directory.
 - LecturAL tests use local fixtures and keep smoke/network/model tests opt-in.
 - Media-method authorization, path containment, atomic JSON replacement, locking, cleanup, partial files, and interrupted-run behavior are tested.
-- Playback tests cover explicit finite queues, visible serial execution, authoritative status mapping, pause on unresolved completion, and absence of automatic retry.
+- Playback tests cover explicit finite queues, visible serial execution, authoritative status mapping, continuation after item failures or unverified results, bounded preview reopening, and absence of playback replay.
 - Lecture-to-code tests require complete primary audiovisual evidence, relevant-frame vision inspection, requirement provenance, external-model disclosure, and requirement-by-requirement project verification, not exact prose or exact model output. Fixed requirement fixtures are authored independently of the runtime output so a generated checklist cannot validate itself.
 
 ### 11.3 Platform CI
@@ -446,6 +446,8 @@ Reusable browser mechanics remain provider-local until at least two independent 
 - The v0.6.1 release preserves JSON schema version 1, adds an agent onboarding guide, and reports structured play failure diagnostics and coverage-based replay completion.
 - The v0.6.2 release preserves CLI envelope schema version 1, fetches unsubmitted assignments with empty submission records, and classifies player frame failures with fixed-token `frame_kind` in play diagnostic schema version 2.
 - The v0.6.3 release preserves CLI envelope schema version 1 and play diagnostic schema version 2, and stops orphaned browser response tasks from printing target-closed exceptions to stderr after commands finish.
+- The v0.6.4 release, on Linux, makes downloaded materials trigger a close-write event so inotify-based sync clients upload them.
+- The v0.7.0 release preserves CLI envelope schema version 1, reopens a lecture preview observed never to have started (at most three attempts), continues the playback queue after item failures and stops only for session failures, adds `attempts` to result items, starts cued YouTube lectures with one bounded click, stops playback when a progress callback is cancelled, and publishes play diagnostic schema version 3.
 
 ### Phase C: course-source retrieval and evidence bridge
 
