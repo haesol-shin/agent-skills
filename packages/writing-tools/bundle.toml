@@ -1,0 +1,7 @@
+schema_version = 1
+name = "writing-tools"
+version = "0.1.0"
+status = "experimental"
+
+[targets]
+canonical = "agent-skills"
